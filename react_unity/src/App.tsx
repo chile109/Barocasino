@@ -7,6 +7,10 @@ import { bacaratAddress } from '../src/assets/definitions/constants/bacarat'
 import BacaratAddress from '../src/assets/definitions/abi/barcarat.json'
 import { createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
+import {
+  generateBaccaratResult,
+  GameResult
+} from './utils/baccarat';
 
 export const publicClient = createPublicClient({
   chain: sepolia,
@@ -16,14 +20,10 @@ export const publicClient = createPublicClient({
 })
 
 const unityContext = new UnityContext({
-  // loaderUrl: "UnityBuild/Baccarate Build.loader.js",
-  // dataUrl: "UnityBuild/Baccarate Build.data",
-  // frameworkUrl: "UnityBuild/Baccarate Build.framework.js",
-  // codeUrl: "UnityBuild/Baccarate Build.wasm",
-  loaderUrl: "UnityBuild/webgl_app.loader.js",
-  dataUrl: "UnityBuild/webgl_app.data",
-  frameworkUrl: "UnityBuild/webgl_app.framework.js",
-  codeUrl: "UnityBuild/webgl_app.wasm",
+  loaderUrl: "UnityBuild/Test.loader.js",
+  dataUrl: "UnityBuild/Test.data",
+  frameworkUrl: "UnityBuild/Test.framework.js",
+  codeUrl: "UnityBuild/Test.wasm",
 });
 
 const App = () => {
@@ -32,58 +32,70 @@ const App = () => {
   const [ypos, setYpos] = useState(0);
   const [user, setUser] = useState('Check User');
   const [userPoint, setUserPoint] = useState(0)
+  const [result, setResult] = useState<GameResult>();
   const [betResult, setBetResult] = useState({
     result: 'Lose',
     earn: '0',
   })
-  const [betMoney, setBetMoney] = useState({playerWin: 100, backerWin: 0, Tie: 0, playerPair:0, bankerPair:0})
+  const [betMoney, setBetMoney] = useState({ playerWin: 100, backerWin: 0, Tie: 0, playerPair: 0, bankerPair: 0 })
 
   useEffect(function () {
-    unityContext.on("MoveCallback", function (direction,xpos, ypos) {
+    unityContext.on("MoveCallback", function (direction, xpos, ypos) {
       setDirection(direction);
       setXpos(xpos);
       setYpos(ypos);
     });
   }, []);
 
+  useEffect(() => {
+    console.log(result)
+  }, [result])
+
   function moveRight() {
-    unityContext.send("Sphere", "MoveRight", 10);
-  }
-  function moveLeft() {
-    unityContext.send("Sphere", "MoveLeft", 10);
+    // unityContext.send("Sphere", "MoveRight", 10);
+    const target = 'Banker'; // 或者 'Player'，或者 'Tie'
+    const gameResult = generateBaccaratResult(target);
+    setResult(gameResult);
+    unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.bankerCards));
   }
 
-  
+  function moveLeft() {
+    // unityContext.send("Sphere", "MoveLeft", 10);
+    const target = 'Player'; // 或者 'Player'，或者 'Tie'
+    const gameResult = generateBaccaratResult(target);
+    unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.playerCards));
+  }
+
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-    // Create a signer to interact with the contract
+  // Create a signer to interact with the contract
   const signer = provider.getSigner();
 
-    console.log('provider', provider)
-    const contractBacarat = new ethers.Contract(
-      bacaratAddress,
-      BacaratAddress,
-      signer,
-    );
-    console.log('contractBacarat', contractBacarat)
-    
-    const readUserInfo = async() => {
-      // contractBacarat.addPlayer()
-      const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
-      // const user = await contractBacarat.players("PLAYER_ADDRESS");
-      setUserPoint(user.toString())
-    }
+  console.log('provider', provider)
+  const contractBacarat = new ethers.Contract(
+    bacaratAddress,
+    BacaratAddress,
+    signer,
+  );
+  console.log('contractBacarat', contractBacarat)
+
+  const readUserInfo = async () => {
+    // contractBacarat.addPlayer()
+    const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
+    // const user = await contractBacarat.players("PLAYER_ADDRESS");
+    setUserPoint(user.toString())
+  }
 
   const enterGame = async () => {
-    
 
-    try{
+
+    try {
       // Call the addPlayer function to add a new player
-    const tx = await contractBacarat.addPlayer();
-    await tx.wait(); // Wait for the transaction to be mined
-    setUser('Successfully join in')
-    }catch(err){
+      const tx = await contractBacarat.addPlayer();
+      await tx.wait(); // Wait for the transaction to be mined
+      setUser('Successfully join in')
+    } catch (err) {
       setUser('User Already in')
       console.log('err', err)
     }
@@ -176,11 +188,11 @@ const App = () => {
 
     });
 
-    console.log('logs', logs[logs.length-1])
+    console.log('logs', logs[logs.length - 1])
 
     let betTotalMoney = betMoney.Tie + betMoney.backerWin + betMoney.bankerPair + betMoney.playerPair + betMoney.playerWin
 
-    let results = logs[logs.length-1] 
+    let results = logs[logs.length - 1]
     let resultMoney = results?.args?.winAmount?.toString()
 
     if (results?.args?.winAmount?.toString() === '0') {
@@ -188,7 +200,7 @@ const App = () => {
         result: 'Lose',
         earn: `${betTotalMoney}`,
       })
-    }else{
+    } else {
       setBetResult({
         result: 'Win',
         earn: resultMoney ? resultMoney : '0',
@@ -203,7 +215,7 @@ const App = () => {
   //   console.log('Bet result:', event.data);
   //   // Update your component's state or perform any necessary actions here
   // };
-  
+
   // contractBacarat.events.BetResult({ fromBlock: 0 }).on('data', handleBetResult);
   // contractBacarat.events.BetResult({ fromBlock: 0 }).on('error', console.error);
 
@@ -214,36 +226,36 @@ const App = () => {
 
   return (
     <>
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        padding: 12,
-      }}
-    >
-      <ConnectButton />
-    </div>
-    <div>
-      <div>
-      {/* <button onClick={enterGame}>Enter Game</button> */}
-        <button onClick={readUserInfo}>Read Info</button>
-        <button onClick={betUser}>Bet</button>
-      </div>
-      <div>
-        <p>{user} {userPoint}</p>
-        <p>{betResult.result} {betResult.earn}</p>
-      </div>
-      <button onClick={moveRight}>MoveRight</button>
-      <button onClick={moveLeft}>MoveLeft</button>
-      {<p>{`Moved! ${direction} x = ${xpos} y = ${ypos} `}</p>}
-      <Unity unityContext={unityContext} 
+      <div
         style={{
-          height: "100%",
-          width: 400,
-          border: "2px solid black",
-          background: "grey",
-        }}/>
-    </div>
+          display: 'flex',
+          justifyContent: 'flex-end',
+          padding: 12,
+        }}
+      >
+        <ConnectButton />
+      </div>
+      <div>
+        <div>
+          {/* <button onClick={enterGame}>Enter Game</button> */}
+          <button onClick={readUserInfo}>Read Info</button>
+          <button onClick={betUser}>Bet</button>
+        </div>
+        <div>
+          <p>{user} {userPoint}</p>
+          <p>{betResult.result} {betResult.earn}</p>
+        </div>
+        <button onClick={moveRight}>MoveRight</button>
+        <button onClick={moveLeft}>MoveLeft</button>
+        {<p>{`Moved! ${direction} x = ${xpos} y = ${ypos} `}</p>}
+        <Unity unityContext={unityContext}
+          style={{
+            height: "100%",
+            width: 400,
+            border: "2px solid black",
+            background: "grey",
+          }} />
+      </div>
     </>
   );
 };
