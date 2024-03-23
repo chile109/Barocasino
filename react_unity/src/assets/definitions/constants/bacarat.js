@@ -1,4 +1,4 @@
-const bacaratAddress = "0x5102F05f5971975709f2cFEe0B8CbDAd7063Ae16";
+const bacaratAddress = "0xE60ceDF33a6473E69f4eb32b52687F0e242B067b";
 
 export {
   bacaratAddress

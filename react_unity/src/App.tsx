@@ -5,6 +5,8 @@ import React, { useState, useEffect } from "react";
 import { ethers } from 'ethers';
 import { bacaratAddress } from '../src/assets/definitions/constants/bacarat'
 import BacaratAddress from '../src/assets/definitions/abi/barcarat.json'
+import { nftAddress } from '../src/assets/definitions/constants/NFT'
+import NFTAddress from '../src/assets/definitions/abi/NFT.json'
 import { createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
 
@@ -60,38 +62,69 @@ const App = () => {
     // Create a signer to interact with the contract
   const signer = provider.getSigner();
 
-    console.log('provider', provider)
+    // console.log('provider', provider)
     const contractBacarat = new ethers.Contract(
       bacaratAddress,
       BacaratAddress,
       signer,
     );
-    console.log('contractBacarat', contractBacarat)
+    // console.log('contractBacarat', contractBacarat)
     
     const readUserInfo = async() => {
       // contractBacarat.addPlayer()
       const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
+      console.log('user', user)
       // const user = await contractBacarat.players("PLAYER_ADDRESS");
       setUserPoint(user.toString())
     }
 
   const enterGame = async () => {
+
+    const contractNFT = new ethers.Contract(
+      nftAddress,
+      NFTAddress,
+      signer,
+    );
     
 
     try{
-      // Call the addPlayer function to add a new player
-    const tx = await contractBacarat.addPlayer();
-    await tx.wait(); // Wait for the transaction to be mined
-    setUser('Successfully join in')
+
+      // const checkUser = await contractBacarat.players()
+      const checkBal = await contractNFT.balanceOf('0x7FE76e93398fFa540c5de59f2F517c1406F469eA', 0)
+      // console.log('checkUser', checkBal.toString())
+      
+      
+      // check user NFT == 1
+      // check NFT transfer to host
+      // add player
+
+      // check user NFT == 1
+      // check NFT 
+      if(checkBal.toString() == '1'){
+
+        const checkApproval = await contractNFT.isApprovedForAll('0x7FE76e93398fFa540c5de59f2F517c1406F469eA', '0xE60ceDF33a6473E69f4eb32b52687F0e242B067b')
+
+        if(!checkApproval){
+          await contractNFT.setApprovalForAll('0xE60ceDF33a6473E69f4eb32b52687F0e242B067b', true)
+
+          // Call the addPlayer function to add a new player
+          const tx = await contractBacarat.addPlayer();
+          await tx.wait(); // Wait for the transaction to be mined
+        }
+        
+        console.log('tx')
+      }
+
+
+      const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
+      setUserPoint(user.toString())
+      setUser('Successfully join in')
     }catch(err){
       setUser('User Already in')
       console.log('err', err)
     }
 
-    // contractBacarat.addPlayer()
-    const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
-    // const user = await contractBacarat.players("PLAYER_ADDRESS");
-    setUserPoint(user.toString())
+    
   }
 
   const betUser = async () => {
