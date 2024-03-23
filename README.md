@@ -13,7 +13,7 @@ For more info please read [Deck](https://www.canva.com/design/DAGAJVy4sMk/dugWol
 
 ## Technologies:
 
-- Hardhat
+- Foundry
 - React
 - Unity
 - OPT blockchain
