@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
@@ -23,22 +25,25 @@ contract Baccarat is UUPSUpgradeable, Ownable {
     }
 
     mapping(address => Player) public players;
-    mapping(uint256 => bool) public passNftUsed;
+    mapping(address => uint256) public usedPassCount;
     mapping(address => bool) public claimed;
     uint256 public constant INITIAL_POINTS = 10000;
+    uint256 public constant BANKER_WIN_RATE = 195;
+    uint256 public constant PLAYER_WIN_RATE = 200;
+    uint256 public constant TIE_RATE = 800;
+    uint256 public constant PLAYER_PAIR_RATE = 1100;
+    uint256 public constant BANKER_PAIR_RATE = 1100;
+    uint256 public constant RATE_DECIMALS = 100;
+    
+    uint256 public PassTokenId; //default 0
     address public passNftAddress;
     address public rewardTokenAddress;
     uint256 public rewardTokenAmount;
     uint256 public endTime;
-    address[] public topThreePlayers = new address[](3);
-    uint256 public bankerWinRate = 200;
-    uint256 public playerWinRate = 195;
-    uint256 public tieRate = 800;
-    uint256 public playerPairRate = 1100;
-    uint256 public bankerPairRate = 1100;
-    uint256 public rateDecimals = 100;
+    address[] public topThreePlayers;
+    
     bool public initialized;
-    IERC721 passNft;
+    IERC1155 passNft;
     IERC20 rewardToken;
     event BetResult(
         address indexed bettor,
@@ -48,31 +53,33 @@ contract Baccarat is UUPSUpgradeable, Ownable {
         uint256 playerPair,
         uint256 bankerPair,
         uint256 winAmount,
-        PairOutcome pairOutcome,
-        GameOutcome gameOutcome
+        uint256 pairOutcome,
+        uint256 gameOutcome
     );
+
+    constructor() Ownable(msg.sender) {}
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
     function initialize(address _passNftAddress, address _rewardTokenAddress, uint256 _rewardTokenAmount, uint256 _endDay) external {
         require(!initialized, "Contract has been initialized.");
         initialized = true;
+        topThreePlayers = new address[](3);
         passNftAddress = _passNftAddress;
         rewardTokenAddress = _rewardTokenAddress;
         rewardTokenAmount = _rewardTokenAmount;
         endTime = block.timestamp + _endDay * 1 days;
-        passNft = IERC721(passNftAddress);
+        passNft = IERC1155(passNftAddress);
         rewardToken = IERC20(rewardTokenAddress);
         rewardToken.transferFrom(msg.sender, address(this), rewardTokenAmount);
         _transferOwnership(tx.origin);
     }
 
     // 初始化玩家積分
-    function addPlayer(uint256 tokenId) external {
-        require(!passNftUsed[tokenId], "NFT has been used.");
-        require(passNft.ownerOf(tokenId) == msg.sender, "Not the owner of the NFT.");
-        require(players[msg.sender].points == 0, "Player already exists.");
+    function addPlayer() external {
+        require(players[msg.sender].points == 0, "Player still in game.");
 
-        passNftUsed[tokenId] = true;
+        passNft.safeTransferFrom(msg.sender, address(this), PassTokenId, 1, "");
+        usedPassCount[msg.sender]++;
         players[msg.sender] = Player(INITIAL_POINTS);
     }
 
@@ -83,6 +90,13 @@ contract Baccarat is UUPSUpgradeable, Ownable {
         require(rank < 3, "Player is not in the top three.");
         claimed[msg.sender] = true;
         rewardToken.transfer(msg.sender, reward(rank));
+    }
+
+    function claimNft() external {
+        require(block.timestamp >= endTime, "The game is not over yet.");
+        require(usedPassCount[msg.sender] > 0, "Player has not used the pass.");
+
+        passNft.safeTransferFrom(address(this), msg.sender, PassTokenId, usedPassCount[msg.sender], "");
     }
 
     // 下注並根據遊戲結果更新積分
@@ -96,8 +110,8 @@ contract Baccarat is UUPSUpgradeable, Ownable {
         external
         returns (
             uint256 winAmount,
-            PairOutcome pairOutcome,
-            GameOutcome gameOutcome
+            uint256 pairResult,
+            uint256 gameResult
         )
     {
         uint256 totalBet = playerWin +
@@ -109,11 +123,14 @@ contract Baccarat is UUPSUpgradeable, Ownable {
             totalBet > 0 && totalBet <= players[msg.sender].points,
             "Invalid bet amount."
         );
+        require(block.timestamp < endTime, "The game is over.");
         players[msg.sender].points -= totalBet; // 扣除下注積分
 
-        GameOutcome betOutcome = betResult();
-        PairOutcome pairOutcome = pairResult();
-        uint256 winAmount = calculateWinAmount(
+        GameOutcome betOutcome = getBetResult();
+        PairOutcome pairOutcome = getPairResult();
+        pairResult = uint256(pairOutcome);
+        gameResult = uint256(betOutcome);
+        winAmount = calculateWinAmount(
             playerWin,
             backerWin,
             Tie,
@@ -130,15 +147,15 @@ contract Baccarat is UUPSUpgradeable, Ownable {
             playerPair,
             bankerPair,
             winAmount,
-            pairOutcome,
-            betOutcome
+            pairResult,
+            gameResult
         );
         players[msg.sender].points += winAmount; // 更新玩家積分
         updateTopThree(msg.sender);
     }
 
     // 生成遊戲結果
-    function betResult() public view returns (GameOutcome) {
+    function getBetResult() public view returns (GameOutcome) {
         uint256 random = unsafeRandom("bet") % 10000;
         if (random < 4586) {
             return GameOutcome.BankerWin;
@@ -149,7 +166,7 @@ contract Baccarat is UUPSUpgradeable, Ownable {
         }
     }
 
-    function pairResult() public view returns (PairOutcome) {
+    function getPairResult() public view returns (PairOutcome) {
         uint256 bankResult = unsafeRandom("bankerPair") % 10000;
         uint256 playerResult = unsafeRandom("playerPair") % 10000;
         if (bankResult < 747 && playerResult < 747) {
@@ -172,24 +189,24 @@ contract Baccarat is UUPSUpgradeable, Ownable {
         uint256 bankerPair,
         GameOutcome gameOutcome,
         PairOutcome pairOutcome
-    ) private view returns (uint256) {
+    ) private pure returns (uint256) {
         uint256 winAmount = 0;
         if (gameOutcome == GameOutcome.PlayerWin) {
-            winAmount += (playerWin * playerWinRate) / rateDecimals;
+            winAmount += (playerWin * PLAYER_WIN_RATE) / RATE_DECIMALS;
         } else if (gameOutcome == GameOutcome.BankerWin) {
-            winAmount += (backerWin * bankerWinRate) / rateDecimals;
+            winAmount += (backerWin * BANKER_WIN_RATE) / RATE_DECIMALS;
         } else if (gameOutcome == GameOutcome.Tie) {
-            winAmount += (Tie * tieRate) / rateDecimals;
+            winAmount += (Tie * TIE_RATE) / RATE_DECIMALS;
         }
 
         if (pairOutcome == PairOutcome.BothPair) {
             winAmount +=
-                ((playerPair * playerPairRate) / rateDecimals) +
-                ((bankerPair * bankerPairRate) / rateDecimals);
+                ((playerPair * PLAYER_PAIR_RATE) / RATE_DECIMALS) +
+                ((bankerPair * BANKER_PAIR_RATE) / RATE_DECIMALS);
         } else if (pairOutcome == PairOutcome.BankerPair) {
-            winAmount += (bankerPair * bankerPairRate) / rateDecimals;
+            winAmount += (bankerPair * BANKER_PAIR_RATE) / RATE_DECIMALS;
         } else if (pairOutcome == PairOutcome.PlayerPair) {
-            winAmount += (playerPair * playerPairRate) / rateDecimals;
+            winAmount += (playerPair * PLAYER_PAIR_RATE) / RATE_DECIMALS;
         }
         return winAmount;
     }
@@ -244,5 +261,35 @@ contract Baccarat is UUPSUpgradeable, Ownable {
         } else {
             return 0;
         }
+    }
+
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    )
+        external
+        returns(bytes4)
+    {
+        return this.onERC1155Received.selector;
+    }
+    
+    function onERC1155BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    )
+        external
+        returns(bytes4)
+    {
+        return this.onERC1155BatchReceived.selector;
+    }
+    
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+        return interfaceId == type(IERC1155Receiver).interfaceId;
     }
 }
