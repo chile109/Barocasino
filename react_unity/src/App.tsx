@@ -20,11 +20,19 @@ export const publicClient = createPublicClient({
 })
 
 const unityContext = new UnityContext({
-  loaderUrl: "UnityBuild/Test.loader.js",
-  dataUrl: "UnityBuild/Test.data",
-  frameworkUrl: "UnityBuild/Test.framework.js",
-  codeUrl: "UnityBuild/Test.wasm",
+  loaderUrl: "UnityBuild/Barocasino.loader.js",
+  dataUrl: "UnityBuild/Barocasino.data",
+  frameworkUrl: "UnityBuild/Barocasino.framework.js",
+  codeUrl: "UnityBuild/Barocasino.wasm",
 });
+
+type BaccaratState = {
+  player: number;
+  banker: number;
+  pair: number;
+  playerPair: number;
+  bankerPair: number;
+}
 
 const App = () => {
   const [direction, setDirection] = useState("");
@@ -32,12 +40,26 @@ const App = () => {
   const [ypos, setYpos] = useState(0);
   const [user, setUser] = useState('Check User');
   const [userPoint, setUserPoint] = useState(0)
-  const [result, setResult] = useState<GameResult>();
+  const [baccaratResult, setbaccaratResult] = useState<GameResult>();
+  const [baccaratStateFromUnity, setBaccaratStateFromUnity] = useState<BaccaratState>({
+    player: 0,
+    banker: 0,
+    pair: 0,
+    playerPair: 0,
+    bankerPair: 0
+  });
   const [betResult, setBetResult] = useState({
     result: 'Lose',
     earn: '0',
   })
   const [betMoney, setBetMoney] = useState({ playerWin: 100, backerWin: 0, Tie: 0, playerPair: 0, bankerPair: 0 })
+
+  const updateBaccaratState = (newState: Partial<BaccaratState>) => {
+    setBaccaratStateFromUnity(prevState => ({
+      ...prevState,
+      ...newState
+    }));
+  };
 
   useEffect(function () {
     unityContext.on("MoveCallback", function (direction, xpos, ypos) {
@@ -48,14 +70,15 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log(result)
-  }, [result])
+    console.log(baccaratResult)
+    console.log(baccaratStateFromUnity)
+  }, [baccaratResult, baccaratStateFromUnity])
 
   function moveRight() {
     // unityContext.send("Sphere", "MoveRight", 10);
     const target = 'Banker'; // 或者 'Player'，或者 'Tie'
     const gameResult = generateBaccaratResult(target);
-    setResult(gameResult);
+    setbaccaratResult(gameResult);
     unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.bankerCards));
   }
 
@@ -65,7 +88,18 @@ const App = () => {
     const gameResult = generateBaccaratResult(target);
     unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.playerCards));
   }
-
+  useEffect(() => {
+    unityContext.on("BetCallback", function (player, banker, pair, playerPair, bankerPair) {
+      console.log('unity bet callback');
+      updateBaccaratState({
+        player,
+        banker,
+        pair,
+        playerPair,
+        bankerPair
+      });
+    });
+  }, [])
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
@@ -245,13 +279,13 @@ const App = () => {
           <p>{user} {userPoint}</p>
           <p>{betResult.result} {betResult.earn}</p>
         </div>
-        <button onClick={moveRight}>MoveRight</button>
-        <button onClick={moveLeft}>MoveLeft</button>
-        {<p>{`Moved! ${direction} x = ${xpos} y = ${ypos} `}</p>}
+        <button onClick={moveRight}>test1</button>
+        <button onClick={moveLeft}>test2</button>
+        {<p></p>}
         <Unity unityContext={unityContext}
           style={{
             height: "100%",
-            width: 400,
+            width: 800,
             border: "2px solid black",
             background: "grey",
           }} />
