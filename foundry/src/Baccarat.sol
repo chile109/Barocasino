@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.25;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-contract Baccarat {
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+
+contract Baccarat is UUPSUpgradeable, Ownable {
     enum GameOutcome {
         BankerWin,
         PlayerWin,
@@ -22,10 +26,10 @@ contract Baccarat {
     mapping(uint256 => bool) public passNftUsed;
     mapping(address => bool) public claimed;
     uint256 public constant INITIAL_POINTS = 10000;
-    address public immutable PASS_NFT_ADDRESS;
-    address public immutable REWARD_TOKEN_ADDRESS;
-    uint256 public immutable REWARD_TOKEN_AMOUNT;
-    uint256 public immutable END_TIME;
+    address public passNftAddress;
+    address public rewardTokenAddress;
+    uint256 public rewardTokenAmount;
+    uint256 public endTime;
     address[] public topThreePlayers = new address[](3);
     uint256 public bankerWinRate = 200;
     uint256 public playerWinRate = 195;
@@ -33,6 +37,7 @@ contract Baccarat {
     uint256 public playerPairRate = 1100;
     uint256 public bankerPairRate = 1100;
     uint256 public rateDecimals = 100;
+    bool public initialized;
     IERC721 passNft;
     IERC20 rewardToken;
     event BetResult(
@@ -46,15 +51,19 @@ contract Baccarat {
         PairOutcome pairOutcome,
         GameOutcome gameOutcome
     );
+    function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
-    constructor(address _passNftAddress, address _rewardTokenAddress, uint256 _rewardTokenAmount, uint256 _endDay) {
-        PASS_NFT_ADDRESS = _passNftAddress;
-        REWARD_TOKEN_ADDRESS = _rewardTokenAddress;
-        REWARD_TOKEN_AMOUNT = _rewardTokenAmount;
-        END_TIME = block.timestamp + _endDay * 1 days;
-        passNft = IERC721(PASS_NFT_ADDRESS);
-        rewardToken = IERC20(REWARD_TOKEN_ADDRESS);
-        rewardToken.transferFrom(msg.sender, address(this), REWARD_TOKEN_AMOUNT);
+    function initialize(address _passNftAddress, address _rewardTokenAddress, uint256 _rewardTokenAmount, uint256 _endDay) external {
+        require(!initialized, "Contract has been initialized.");
+        initialized = true;
+        passNftAddress = _passNftAddress;
+        rewardTokenAddress = _rewardTokenAddress;
+        rewardTokenAmount = _rewardTokenAmount;
+        endTime = block.timestamp + _endDay * 1 days;
+        passNft = IERC721(passNftAddress);
+        rewardToken = IERC20(rewardTokenAddress);
+        rewardToken.transferFrom(msg.sender, address(this), rewardTokenAmount);
+        _transferOwnership(tx.origin);
     }
 
     // 初始化玩家積分
@@ -68,7 +77,7 @@ contract Baccarat {
     }
 
     function claimReward() external {
-        require(block.timestamp >= END_TIME, "The game is not over yet.");
+        require(block.timestamp >= endTime, "The game is not over yet.");
         require(!claimed[msg.sender], "Reward has been claimed.");
         uint256 rank = rankInTopThree(msg.sender);
         require(rank < 3, "Player is not in the top three.");
@@ -113,7 +122,17 @@ contract Baccarat {
             betOutcome,
             pairOutcome
         ); // 根據結果計算贏得的積分
-
+        emit BetResult(
+            msg.sender,
+            playerWin,
+            backerWin,
+            Tie,
+            playerPair,
+            bankerPair,
+            winAmount,
+            pairOutcome,
+            betOutcome
+        );
         players[msg.sender].points += winAmount; // 更新玩家積分
         updateTopThree(msg.sender);
     }
@@ -217,11 +236,11 @@ contract Baccarat {
 
     function reward(uint256 rank) public view returns (uint256) {
         if (rank == 0) {
-            return REWARD_TOKEN_AMOUNT / 10 * 5;
+            return rewardTokenAmount / 10 * 5;
         } else if (rank == 1) {
-            return REWARD_TOKEN_AMOUNT / 10 * 3;
+            return rewardTokenAmount / 10 * 3;
         } else if (rank == 2) {
-            return REWARD_TOKEN_AMOUNT / 10 * 2;
+            return rewardTokenAmount / 10 * 2;
         } else {
             return 0;
         }
