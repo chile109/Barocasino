@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract Baccarat {
     enum GameOutcome {
         BankerWin,
@@ -13,12 +14,18 @@ contract Baccarat {
         NoPair,
         BothPair
     }
-    uint256 public constant INITIAL_POINTS = 10000;
     struct Player {
         uint256 points;
     }
 
     mapping(address => Player) public players;
+    mapping(uint256 => bool) public passNftUsed;
+    mapping(address => bool) public claimed;
+    uint256 public constant INITIAL_POINTS = 10000;
+    address public immutable PASS_NFT_ADDRESS;
+    address public immutable REWARD_TOKEN_ADDRESS;
+    uint256 public immutable REWARD_TOKEN_AMOUNT;
+    uint256 public immutable END_TIME;
     address[] public topThreePlayers = new address[](3);
     uint256 public bankerWinRate = 200;
     uint256 public playerWinRate = 195;
@@ -26,7 +33,8 @@ contract Baccarat {
     uint256 public playerPairRate = 1100;
     uint256 public bankerPairRate = 1100;
     uint256 public rateDecimals = 100;
-
+    IERC721 passNft;
+    IERC20 rewardToken;
     event BetResult(
         address indexed bettor,
         uint256 playerWin,
@@ -39,10 +47,33 @@ contract Baccarat {
         GameOutcome gameOutcome
     );
 
+    constructor(address _passNftAddress, address _rewardTokenAddress, uint256 _rewardTokenAmount, uint256 _endDay) {
+        PASS_NFT_ADDRESS = _passNftAddress;
+        REWARD_TOKEN_ADDRESS = _rewardTokenAddress;
+        REWARD_TOKEN_AMOUNT = _rewardTokenAmount;
+        END_TIME = block.timestamp + _endDay * 1 days;
+        passNft = IERC721(PASS_NFT_ADDRESS);
+        rewardToken = IERC20(REWARD_TOKEN_ADDRESS);
+        rewardToken.transferFrom(msg.sender, address(this), REWARD_TOKEN_AMOUNT);
+    }
+
     // 初始化玩家積分
-    function addPlayer() external {
+    function addPlayer(uint256 tokenId) external {
+        require(!passNftUsed[tokenId], "NFT has been used.");
+        require(passNft.ownerOf(tokenId) == msg.sender, "Not the owner of the NFT.");
         require(players[msg.sender].points == 0, "Player already exists.");
+
+        passNftUsed[tokenId] = true;
         players[msg.sender] = Player(INITIAL_POINTS);
+    }
+
+    function claimReward() external {
+        require(block.timestamp >= END_TIME, "The game is not over yet.");
+        require(!claimed[msg.sender], "Reward has been claimed.");
+        uint256 rank = rankInTopThree(msg.sender);
+        require(rank < 3, "Player is not in the top three.");
+        claimed[msg.sender] = true;
+        rewardToken.transfer(msg.sender, reward(rank));
     }
 
     // 下注並根據遊戲結果更新積分
@@ -166,6 +197,15 @@ contract Baccarat {
         }
     }
 
+    function rankInTopThree(address player) public view returns (uint256) {
+        for (uint i = 0; i < topThreePlayers.length; i++) {
+            if (topThreePlayers[i] == player) {
+                return i;
+            }
+        }
+        return 3; // not in top three
+    }
+
     function unsafeRandom(string memory seed) private view returns (uint256) {
         return
             uint256(
@@ -173,5 +213,17 @@ contract Baccarat {
                     abi.encodePacked(block.timestamp, block.prevrandao, seed)
                 )
             );
+    }
+
+    function reward(uint256 rank) public view returns (uint256) {
+        if (rank == 0) {
+            return REWARD_TOKEN_AMOUNT / 10 * 5;
+        } else if (rank == 1) {
+            return REWARD_TOKEN_AMOUNT / 10 * 3;
+        } else if (rank == 2) {
+            return REWARD_TOKEN_AMOUNT / 10 * 2;
+        } else {
+            return 0;
+        }
     }
 }
