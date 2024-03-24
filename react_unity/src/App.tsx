@@ -61,7 +61,7 @@ const App = () => {
     );
       
     try{
-      const checkBal = await contractNFT.balanceOf('0x7FE76e93398fFa540c5de59f2F517c1406F469eA', 0)
+      const checkBal = await contractNFT.balanceOf(loginAddress, 0)
       
       // check user NFT == 1
       // check NFT transfer to host
@@ -70,9 +70,9 @@ const App = () => {
       // check user NFT == 1
       // check NFT 
       if(checkBal.toNumber() > 0){
-        const checkApproval = await contractNFT.isApprovedForAll('0x7FE76e93398fFa540c5de59f2F517c1406F469eA', '0x36eE7E01Db601e2454430F86480734fa1Aaca172')
+        const checkApproval = await contractNFT.isApprovedForAll(loginAddress, nftAddress)
         if(!checkApproval){
-          await contractNFT.setApprovalForAll('0x36eE7E01Db601e2454430F86480734fa1Aaca172', true)
+          await contractNFT.setApprovalForAll(nftAddress, true)
 
           // Call the addPlayer function to add a new player
           const tx = await contractBacarat.addPlayer({ gasLimit: 500000 });
@@ -80,7 +80,7 @@ const App = () => {
         }
       }
 
-      const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
+      const user = await contractBacarat.players(loginAddress)
       setUserPoint(user.toString())
       setUser('Successfully join in')
     }catch(err){
