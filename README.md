@@ -17,6 +17,16 @@ For more info please read [Deck](https://www.canva.com/design/DAGAJVy4sMk/dugWol
 - Unity
 - OPT blockchain
 
+## Deployed Contracts:
+### Optimism L2:
+- [Mint Club Bounding Curve NFT](https://optimistic.etherscan.io/address/0x36eE7E01Db601e2454430F86480734fa1Aaca172#code) 
+  - [Mint Club NFT Buying Link](https://mint.club/nft/optimism/BCN)
+- [Tournament builder](https://optimistic.etherscan.io/address/0xc9c39f808d183f8cEB6FC0e322c5ED9b5fB3c2C2#code)
+- [Tournament Proxy](https://optimistic.etherscan.io/address/0xA3dF56EFac90a19334F4A3f75e3743129A8383E2#code) 
+- [Baccarat Game implement](https://optimistic.etherscan.io/address/0xf65c50ddb43d2cd009ac17bbe501e5a20caec5e6#code)
+  
+
+
 ## Structure:
 
 ![Project Structure](assets/project_structure.png)
