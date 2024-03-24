@@ -1,13 +1,6 @@
 [
    {
       "inputs":[
-         
-      ],
-      "stateMutability":"nonpayable",
-      "type":"constructor"
-   },
-   {
-      "inputs":[
          {
             "internalType":"address",
             "name":"target",
@@ -40,28 +33,6 @@
          
       ],
       "name":"FailedInnerCall",
-      "type":"error"
-   },
-   {
-      "inputs":[
-         {
-            "internalType":"address",
-            "name":"owner",
-            "type":"address"
-         }
-      ],
-      "name":"OwnableInvalidOwner",
-      "type":"error"
-   },
-   {
-      "inputs":[
-         {
-            "internalType":"address",
-            "name":"account",
-            "type":"address"
-         }
-      ],
-      "name":"OwnableUnauthorizedAccount",
       "type":"error"
    },
    {
@@ -179,6 +150,36 @@
       "inputs":[
          
       ],
+      "name":"BANKER_PAIR_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"BANKER_WIN_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
       "name":"INITIAL_POINTS",
       "outputs":[
          {
@@ -194,7 +195,67 @@
       "inputs":[
          
       ],
+      "name":"PLAYER_PAIR_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"PLAYER_WIN_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
       "name":"PassTokenId",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"RATE_DECIMALS",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"TIE_RATE",
       "outputs":[
          {
             "internalType":"uint256",
@@ -229,36 +290,6 @@
          
       ],
       "stateMutability":"nonpayable",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"bankerPairRate",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"bankerWinRate",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
       "type":"function"
    },
    {
@@ -551,36 +582,6 @@
    },
    {
       "inputs":[
-         
-      ],
-      "name":"playerPairRate",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"playerWinRate",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
          {
             "internalType":"address",
             "name":"",
@@ -622,21 +623,6 @@
          }
       ],
       "name":"rankInTopThree",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"rateDecimals",
       "outputs":[
          {
             "internalType":"uint256",
@@ -721,21 +707,6 @@
             "internalType":"bool",
             "name":"",
             "type":"bool"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"tieRate",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
          }
       ],
       "stateMutability":"view",

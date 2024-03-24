@@ -95,67 +95,67 @@ const App = () => {
 
     const logs = await publicClient.getLogs({
       address: '0xf65c50Ddb43d2Cd009ac17Bbe501E5A20caec5e6',
-      event: {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: true,
-            internalType: "address",
-            name: "bettor",
-            type: "address",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "playerWin",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "backerWin",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "Tie",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "playerPair",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "bankerPair",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "winAmount",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "enum Baccarat.PairOutcome",
-            name: "pairOutcome",
-            type: "uint8",
-          },
-          {
-            indexed: false,
-            internalType: "enum Baccarat.GameOutcome",
-            name: "gameOutcome",
-            type: "uint8",
-          },
+      event:    {
+        "anonymous":false,
+        "inputs":[
+           {
+              "indexed":true,
+              "internalType":"address",
+              "name":"bettor",
+              "type":"address"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"playerWin",
+              "type":"uint256"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"backerWin",
+              "type":"uint256"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"Tie",
+              "type":"uint256"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"playerPair",
+              "type":"uint256"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"bankerPair",
+              "type":"uint256"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"winAmount",
+              "type":"uint256"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"pairOutcome",
+              "type":"uint256"
+           },
+           {
+              "indexed":false,
+              "internalType":"uint256",
+              "name":"gameOutcome",
+              "type":"uint256"
+           }
         ],
-        name: "BetResult",
-        type: "event",
-      },
+        "name":"BetResult",
+        "type":"event"
+     },
       // args: {
       //   from: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
       //   to: '0xa5cc3c03994db5b0d9a5eedd10cabab0813678ac'
