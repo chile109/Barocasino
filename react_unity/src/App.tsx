@@ -260,36 +260,11 @@ const App = () => {
 
   return (
     <>
-      <div
+      <Unity unityContext={unityContext}
         style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          padding: 12,
-        }}
-      >
-        <ConnectButton />
-      </div>
-      <div>
-        <div>
-          {/* <button onClick={enterGame}>Enter Game</button> */}
-          <button onClick={readUserInfo}>Read Info</button>
-          <button onClick={betUser}>Bet</button>
-        </div>
-        <div>
-          <p>{user} {userPoint}</p>
-          <p>{betResult.result} {betResult.earn}</p>
-        </div>
-        <button onClick={moveRight}>test1</button>
-        <button onClick={moveLeft}>test2</button>
-        {<p></p>}
-        <Unity unityContext={unityContext}
-          style={{
-            height: "100%",
-            width: 800,
-            border: "2px solid black",
-            background: "grey",
-          }} />
-      </div>
+          height: "100vh",
+          width: "100vw",
+        }} />
     </>
   );
 };
