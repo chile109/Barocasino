@@ -9,6 +9,8 @@ import { nftAddress } from '../src/assets/definitions/constants/NFT'
 import NFTAddress from '../src/assets/definitions/abi/NFT.json'
 import { createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
+import EnterPage from './components/enterPage'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export const publicClient = createPublicClient({
   chain: sepolia,
@@ -247,7 +249,7 @@ const App = () => {
 
   return (
     <>
-    <div
+    {/* <div
       style={{
         display: 'flex',
         justifyContent: 'flex-end',
@@ -255,7 +257,8 @@ const App = () => {
       }}
     >
       <ConnectButton />
-    </div>
+    </div> */}
+    <EnterPage />
     <div>
       <div>
       {/* <button onClick={enterGame}>Enter Game</button> */}
