@@ -8,16 +8,19 @@ import BacaratAddress from '../src/assets/definitions/abi/barcarat.json'
 import { nftAddress } from '../src/assets/definitions/constants/NFT'
 import NFTAddress from '../src/assets/definitions/abi/NFT.json'
 import { createPublicClient, http } from 'viem';
-import { sepolia } from 'viem/chains';
+import { sepolia, optimism } from 'viem/chains';
 import EnterPage from './components/enterPage'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { check } from 'prettier';
 
 export const publicClient = createPublicClient({
-  chain: sepolia,
+  chain: optimism,
   transport: http(
-    'https://eth-sepolia.g.alchemy.com/v2/mZBt78HBjoKpxAt7vWXtibpvQxEg4Dhb'
+    'https://opt-mainnet.g.alchemy.com/v2/Vu6asWumE3Ozc3vkSRy7Uya0q-G5NLYR'
   )
 })
+
+console.log('publicClient',publicClient)
 
 const unityContext = new UnityContext({
   // loaderUrl: "UnityBuild/Baccarate Build.loader.js",
@@ -41,21 +44,8 @@ const App = () => {
     earn: '0',
   })
   const [betMoney, setBetMoney] = useState({playerWin: 100, backerWin: 0, Tie: 0, playerPair:0, bankerPair:0})
+  const [loginAddress, setLoginAddress] = useState('')
 
-  useEffect(function () {
-    unityContext.on("MoveCallback", function (direction,xpos, ypos) {
-      setDirection(direction);
-      setXpos(xpos);
-      setYpos(ypos);
-    });
-  }, []);
-
-  function moveRight() {
-    unityContext.send("Sphere", "MoveRight", 10);
-  }
-  function moveLeft() {
-    unityContext.send("Sphere", "MoveLeft", 10);
-  }
 
   
 
@@ -63,6 +53,14 @@ const App = () => {
 
     // Create a signer to interact with the contract
   const signer = provider.getSigner();
+
+  // Get the address of the signer
+  signer.getAddress().then(address => {
+    console.log('Logged-in address:', address);
+    setLoginAddress(address)
+  }).catch(error => {
+    console.error('Error getting address:', error);
+  });
 
     // console.log('provider', provider)
     const contractBacarat = new ethers.Contract(
@@ -74,8 +72,8 @@ const App = () => {
     
     const readUserInfo = async() => {
       // contractBacarat.addPlayer()
-      const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
-      console.log('user', user)
+      const user = await contractBacarat.players(loginAddress)
+      console.log('user', user.toString())
       // const user = await contractBacarat.players("PLAYER_ADDRESS");
       setUserPoint(user.toString())
     }
@@ -88,7 +86,7 @@ const App = () => {
       signer,
     );
     
-
+      
     try{
 
       // const checkUser = await contractBacarat.players()
@@ -102,15 +100,19 @@ const App = () => {
 
       // check user NFT == 1
       // check NFT 
-      if(checkBal.toString() == '1'){
+      console.log('checkBal',checkBal)
+      if(checkBal.toNumber() > 0){
 
-        const checkApproval = await contractNFT.isApprovedForAll('0x7FE76e93398fFa540c5de59f2F517c1406F469eA', '0xE60ceDF33a6473E69f4eb32b52687F0e242B067b')
+        console.log('loginAddress',loginAddress)
 
+        const checkApproval = await contractNFT.isApprovedForAll('0x7FE76e93398fFa540c5de59f2F517c1406F469eA', '0x36eE7E01Db601e2454430F86480734fa1Aaca172')
+        console.log(checkApproval)
         if(!checkApproval){
-          await contractNFT.setApprovalForAll('0xE60ceDF33a6473E69f4eb32b52687F0e242B067b', true)
+          console.log('check approve')
+          await contractNFT.setApprovalForAll('0x36eE7E01Db601e2454430F86480734fa1Aaca172', true)
 
           // Call the addPlayer function to add a new player
-          const tx = await contractBacarat.addPlayer();
+          const tx = await contractBacarat.addPlayer({ gasLimit: 500000 });
           await tx.wait(); // Wait for the transaction to be mined
         }
         
@@ -119,6 +121,7 @@ const App = () => {
 
 
       const user = await contractBacarat.players('0x7FE76e93398fFa540c5de59f2F517c1406F469eA')
+      console.log('user', user)
       setUserPoint(user.toString())
       setUser('Successfully join in')
     }catch(err){
@@ -140,7 +143,7 @@ const App = () => {
 
     // console.log(provider.getLogs())
     const logs = await publicClient.getLogs({
-      address: "0x5102F05f5971975709f2cFEe0B8CbDAd7063Ae16",
+      address: '0xf65c50Ddb43d2Cd009ac17Bbe501E5A20caec5e6',
       event: {
         anonymous: false,
         inputs: [
@@ -206,10 +209,12 @@ const App = () => {
       //   from: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
       //   to: '0xa5cc3c03994db5b0d9a5eedd10cabab0813678ac'
       // },
-      fromBlock: BigInt(5543048),
+      fromBlock: BigInt(117808743),
       toBlock: "latest",
 
     });
+
+    console.log('log', logs)
 
     console.log('logs', logs[logs.length-1])
 
@@ -245,7 +250,7 @@ const App = () => {
 
   useEffect(() => {
     enterGame()
-  }, [])
+  }, [loginAddress])
 
   return (
     <>
@@ -269,16 +274,6 @@ const App = () => {
         <p>{user} {userPoint}</p>
         <p>{betResult.result} {betResult.earn}</p>
       </div>
-      <button onClick={moveRight}>MoveRight</button>
-      <button onClick={moveLeft}>MoveLeft</button>
-      {<p>{`Moved! ${direction} x = ${xpos} y = ${ypos} `}</p>}
-      <Unity unityContext={unityContext} 
-        style={{
-          height: "100%",
-          width: 400,
-          border: "2px solid black",
-          background: "grey",
-        }}/>
     </div>
     </>
   );
