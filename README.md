@@ -63,10 +63,10 @@ Node.js
 Yarn
 Once you have installed the required dependencies, you can clone the BaroCasino repository from GitHub:
 ```
-git clone https://github.com/your-username/barocasino.git
+git clone https://github.com/chile109/barocasino.git
 ```
 
-Once you have cloned the repository, you can install the project's dependencies:
+Once you have cloned the repository, you can go react-unity folder and install the project's dependencies:
 ```
 yarn install
 ```
