@@ -1,5 +1,4 @@
 //import React from "react";
-import { UnityContext } from "react-unity-webgl";
 import { useState, useEffect } from "react";
 import { ethers } from 'ethers';
 import { bacaratAddress } from '../src/assets/definitions/constants/bacarat'
@@ -8,8 +7,14 @@ import { nftAddress } from '../src/assets/definitions/constants/NFT'
 import NFTAddress from '../src/assets/definitions/abi/NFT.json'
 import { createPublicClient, http } from 'viem';
 import { optimism } from 'viem/chains';
-import EnterPage from './components/enterPage'
+import ChooseGame from './components/choosePage'
+import EnterGame from './components/enterPage'
+import GameDeck from './components/gameDeck'
+import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi'
+import { useNavigate } from "react-router-dom";
+
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter , Routes, Route } from 'react-router-dom'
 
 export const publicClient = createPublicClient({
   chain: optimism,
@@ -26,31 +31,25 @@ const App = () => {
     earn: '0',
   })
   const [betMoney, setBetMoney] = useState({playerWin: 100, backerWin: 0, Tie: 0, playerPair:0, bankerPair:0})
-  const [loginAddress, setLoginAddress] = useState('')
+  const { address } = useAccount()
+  const { disconnect } = useDisconnect()
+  const navigate = useNavigate()
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     // Create a signer to interact with the contract
   const signer = provider.getSigner();
 
-  // Get the address of the signer
-  signer.getAddress().then(address => {
-    console.log('Logged-in address:', address);
-    setLoginAddress(address)
-  }).catch(error => {
-    console.error('Error getting address:', error);
-  });
-
-    const contractBacarat = new ethers.Contract(
-      bacaratAddress,
-      BacaratAddress,
-      signer,
-    );
+  const contractBacarat = new ethers.Contract(
+    bacaratAddress,
+    BacaratAddress,
+    signer,
+  );
     
-    const readUserInfo = async() => {
-      const user = await contractBacarat.players(loginAddress)
-      setUserPoint(user.toString())
-    }
+  const readUserInfo = async() => {
+    const user = await contractBacarat.players(address)
+    setUserPoint(user.toString())
+  }
 
   const enterGame = async () => {
 
@@ -61,26 +60,29 @@ const App = () => {
     );
       
     try{
-      const checkBal = await contractNFT.balanceOf(loginAddress, 0)
-      
-      // check user NFT == 1
-      // check NFT transfer to host
-      // add player
 
-      // check user NFT == 1
-      // check NFT 
-      if(checkBal.toNumber() > 0){
-        const checkApproval = await contractNFT.isApprovedForAll(loginAddress, nftAddress)
-        if(!checkApproval){
-          await contractNFT.setApprovalForAll(nftAddress, true)
+      if(address && address.length > 0){
+        const checkBal = await contractNFT.balanceOf(address, 0)
+        
+        // check user NFT == 1
+        // check NFT transfer to host
+        // add player
 
-          // Call the addPlayer function to add a new player
-          const tx = await contractBacarat.addPlayer({ gasLimit: 500000 });
-          await tx.wait(); // Wait for the transaction to be mined
+        // check user NFT == 1
+        // check NFT 
+        if(checkBal.toNumber() > 0){
+          const checkApproval = await contractNFT.isApprovedForAll(address, nftAddress)
+          if(!checkApproval){
+            await contractNFT.setApprovalForAll(nftAddress, true)
+
+            // Call the addPlayer function to add a new player
+            const tx = await contractBacarat.addPlayer({ gasLimit: 500000 });
+            await tx.wait(); // Wait for the transaction to be mined
+          }
         }
       }
 
-      const user = await contractBacarat.players(loginAddress)
+      const user = await contractBacarat.players(address)
       setUserPoint(user.toString())
       setUser('Successfully join in')
     }catch(err){
@@ -186,22 +188,37 @@ const App = () => {
   }
 
   useEffect(() => {
-    enterGame()
-  }, [loginAddress])
+    if(address && address.length > 0){
+      enterGame()
+    }else{
+      navigate('/')
+    }
+  }, [address])
 
   return (
     <>
-    <EnterPage />
+
+    <Routes>
+          <Route element={<EnterGame />} path={'/'}></Route>
+          <Route element={<ChooseGame />} path='/login'></Route>
+          <Route element={<GameDeck />} path='/game'></Route>
+    </Routes>
+
     <div>
       <div>
         <button onClick={readUserInfo}>Read Info</button>
         <button onClick={betUser}>Bet</button>
+        <button onClick={enterGame}>check login</button>
+        <button onClick={() => disconnect()}>
+          Disconnect
+        </button>
       </div>
       <div>
         <p>{user} {userPoint}</p>
         <p>{betResult.result} {betResult.earn}</p>
       </div>
     </div>
+
     </>
   );
 };
