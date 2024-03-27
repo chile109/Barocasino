@@ -60,6 +60,9 @@ const App = () => {
       ...newState
     }));
   };
+  const [ReceivedFromUnityPlayer, setReceivedPlayerFromUnity] = useState(false);
+  const [ReceivedFromUnityBanker, setReceivedBankerFromUnity] = useState(false);
+
 
   useEffect(function () {
     unityContext.on("MoveCallback", function (direction, xpos, ypos) {
@@ -74,20 +77,27 @@ const App = () => {
     console.log(baccaratStateFromUnity)
   }, [baccaratResult, baccaratStateFromUnity])
 
-  function moveRight() {
-    // unityContext.send("Sphere", "MoveRight", 10);
-    const target = 'Banker'; // 或者 'Player'，或者 'Tie'
+  function sendPlayerCard() {
+    const target = 'Player'; // 或者 'Player'，或者 'Tie'
     const gameResult = generateBaccaratResult(target);
-    setbaccaratResult(gameResult);
+    // setbaccaratResult(gameResult);
     unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.bankerCards));
   }
 
-  function moveLeft() {
-    // unityContext.send("Sphere", "MoveLeft", 10);
-    const target = 'Player'; // 或者 'Player'，或者 'Tie'
+  function sendBankerCard() {
+    const target = 'Banker'; // 或者 'Player'，或者 'Tie'
     const gameResult = generateBaccaratResult(target);
-    unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.playerCards));
+    unityContext.send("BrowserBridge", "GetBankerShowCard", JSON.stringify(gameResult.playerCards));
   }
+
+  function sendAllCard() {
+    const target = 'Banker'; // 或者 'Player'，或者 'Tie'
+    const gameResult = generateBaccaratResult(target);
+    unityContext.send("BrowserBridge", "GetBankerShowCard", JSON.stringify(gameResult.playerCards));
+    unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.bankerCards));
+
+  }
+
   useEffect(() => {
     unityContext.on("BetCallback", function (player, banker, pair, playerPair, bankerPair) {
       console.log('unity bet callback');
@@ -99,6 +109,16 @@ const App = () => {
         bankerPair
       });
     });
+  }, [])
+
+  useEffect(() => {
+    unityContext.on("RequestPlayerShowCard", function () {
+      console.log('unity RequestPlayerShowCard');
+      setReceivedPlayerFromUnity(true);
+    });
+    unityContext.on("RequestBankerShowCard", function () {
+      console.log('unity RequestBankerShowCard');
+    })
   }, [])
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -255,41 +275,21 @@ const App = () => {
 
 
   useEffect(() => {
-    enterGame()
+    // enterGame()
   }, [])
 
   return (
     <>
-      <div
+      <button onClick={sendPlayerCard}>send player card</button>
+      <button onClick={sendBankerCard}>send banker card</button>
+      <button onClick={sendAllCard}>send all card</button>
+      <Unity unityContext={unityContext}
         style={{
           display: 'flex',
           justifyContent: 'flex-end',
           padding: 12,
         }}
-      >
-        <ConnectButton />
-      </div>
-      <div>
-        <div>
-          {/* <button onClick={enterGame}>Enter Game</button> */}
-          <button onClick={readUserInfo}>Read Info</button>
-          <button onClick={betUser}>Bet</button>
-        </div>
-        <div>
-          <p>{user} {userPoint}</p>
-          <p>{betResult.result} {betResult.earn}</p>
-        </div>
-        <button onClick={moveRight}>test1</button>
-        <button onClick={moveLeft}>test2</button>
-        {<p></p>}
-        <Unity unityContext={unityContext}
-          style={{
-            height: "100%",
-            width: 800,
-            border: "2px solid black",
-            background: "grey",
-          }} />
-      </div>
+      />
     </>
   );
 };
