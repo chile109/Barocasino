@@ -41,6 +41,12 @@ const App = () => {
   const [user, setUser] = useState('Check User');
   const [userPoint, setUserPoint] = useState(0)
   const [baccaratResult, setbaccaratResult] = useState<GameResult>();
+  const updateBaccaratState = (newState: Partial<BaccaratState>) => {
+    setBaccaratStateFromUnity(prevState => ({
+      ...prevState,
+      ...newState
+    }));
+  };
   const [baccaratStateFromUnity, setBaccaratStateFromUnity] = useState<BaccaratState>({
     player: 0,
     banker: 0,
@@ -54,12 +60,8 @@ const App = () => {
   })
   const [betMoney, setBetMoney] = useState({ playerWin: 100, backerWin: 0, Tie: 0, playerPair: 0, bankerPair: 0 })
 
-  const updateBaccaratState = (newState: Partial<BaccaratState>) => {
-    setBaccaratStateFromUnity(prevState => ({
-      ...prevState,
-      ...newState
-    }));
-  };
+  const [reaciveFromUnity, setReaciveFromUnity] = useState(false);
+
 
   useEffect(function () {
     unityContext.on("MoveCallback", function (direction, xpos, ypos) {
@@ -74,7 +76,7 @@ const App = () => {
     console.log(baccaratStateFromUnity)
   }, [baccaratResult, baccaratStateFromUnity])
 
-  function moveRight() {
+  function unityTestButton01() {
     // unityContext.send("Sphere", "MoveRight", 10);
     const target = 'Banker'; // 或者 'Player'，或者 'Tie'
     const gameResult = generateBaccaratResult(target);
@@ -82,7 +84,7 @@ const App = () => {
     unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.bankerCards));
   }
 
-  function moveLeft() {
+  function unityTestButton02() {
     // unityContext.send("Sphere", "MoveLeft", 10);
     const target = 'Player'; // 或者 'Player'，或者 'Tie'
     const gameResult = generateBaccaratResult(target);
@@ -100,6 +102,20 @@ const App = () => {
       });
     });
   }, [])
+
+  useEffect(() => {
+    unityContext.on("RequestPlayerShowCard", function () {
+      console.log('unity RequestPlayerShowCard');
+      setReaciveFromUnity(true);
+    });
+  }, [])
+
+  useEffect(() => {
+    const target = 'Player'; // 或者 'Player'，或者 'Tie'
+    const gameResult = generateBaccaratResult(target);
+    unityContext.send("BrowserBridge", "GetPalyerShowCard", JSON.stringify(gameResult.playerCards));
+    setReaciveFromUnity(false);
+  }, [reaciveFromUnity])
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
@@ -260,9 +276,11 @@ const App = () => {
 
   return (
     <>
+    <button onClick={unityTestButton01}>Unity Test Button 01</button>
+    <button onClick={unityTestButton02}>Unity Test Button 02</button>
       <Unity unityContext={unityContext}
         style={{
-          height: "100vh",
+          height: "80vh",
           width: "100vw",
         }} />
     </>
