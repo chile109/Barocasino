@@ -15,12 +15,15 @@ import { useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
+
+
 export const publicClient = createPublicClient({
   chain: optimism,
   transport: http(
     'https://opt-mainnet.g.alchemy.com/v2/Vu6asWumE3Ozc3vkSRy7Uya0q-G5NLYR'
   )
 })
+
 
 const App = () => {
   const [user, setUser] = useState('Check User');
@@ -185,6 +188,7 @@ const App = () => {
 
     readUserInfo()
   }
+
 
   useEffect(() => {
     if (address && address.length > 0) {

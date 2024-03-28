@@ -1,4 +1,4 @@
-import Experience from './experience'
+import Experience from './experience';
 import { useNavigate } from "react-router-dom";
 
 export default function GameDeck() {
