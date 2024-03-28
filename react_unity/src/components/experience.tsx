@@ -3,12 +3,11 @@ import Unity, { UnityContext } from 'react-unity-webgl';
 import React, { useEffect } from 'react';
 
 const unityContext = new UnityContext({
-  loaderUrl: 'unity/Build/unity.loader.js',
-  dataUrl: 'unity/Build/unity.data',
-  frameworkUrl: 'unity/Build/unity.framework.js',
-  codeUrl: 'unity/Build/unity.wasm',
+  loaderUrl: "UnityBuild/Barocasino.loader.js",
+  dataUrl: "UnityBuild/Barocasino.data",
+  frameworkUrl: "UnityBuild/Barocasino.framework.js",
+  codeUrl: "UnityBuild/Barocasino.wasm",
 });
-
 const Experience = () => {
 
   const sendPlayerCard = () => {
@@ -61,9 +60,8 @@ const Experience = () => {
         <Unity unityContext={unityContext}
           style={{
             height: "100%",
-            width: 800,
-            border: "2px solid black",
-            background: "grey",
+            width: '100%',
+            borderRadius: '15px',
           }} />
       </div>
     </div>
