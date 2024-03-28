@@ -64,6 +64,9 @@ const Experience = () => {
             borderRadius: '15px',
           }} />
       </div>
+      <button onClick={sendPlayerCard}>send player card</button>
+      <button onClick={sendBankerCard}>send banker card</button>
+      <button onClick={sendAllCard}>send all card</button>
     </div>
   );
 };
