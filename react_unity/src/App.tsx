@@ -215,6 +215,7 @@ const App = () => {
           <button onClick={() => disconnect()}>
             Disconnect
           </button>
+          <button onClick={() => navigate('/game')}>go to game page</button>
         </div>
         <div>
           <p>{user} {userPoint}</p>
