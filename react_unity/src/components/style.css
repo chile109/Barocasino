@@ -1,0 +1,282 @@
+html {
+  min-height: 100%; }
+
+body {
+  background-image: url("../../public/images//bg.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  min-height: 100%; }
+
+section {
+  padding: 30px 0; }
+
+.login-block {
+  background-color: #F8F0E2;
+  border: solid 3px #B17D6C;
+  border-radius: 15px; }
+
+.banner-text {
+  padding: 30px; }
+
+.player-login button {
+  margin-bottom: 15px; }
+
+.player-info {
+  display: inline-block; }
+  .player-info .avatar {
+    height: 80px;
+    width: 80px;
+    display: inline-block;
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px; }
+  .player-info .wrap {
+    margin-bottom: 15px; }
+
+.banner {
+  min-height: 400px;
+  width: 50%;
+  background-size: cover;
+    background-image: url("../../public/images/banner.jpg");
+  background-position: center; }
+
+.banner-text {
+  text-align: center;
+  width: 50%; }
+  .banner-text .logo {
+    margin-bottom: 30px;
+    width: 100%; }
+    .banner-text .logo img {
+      width: 100%;
+      max-width: 250px;
+      display: inline-block; }
+  .banner-text p {
+    margin-bottom: 30px; }
+
+.btn.btn-back {
+  font-size: 40px;
+  color: #B17D6C; }
+
+.icon-arrow-left {
+  width: 40px;
+  height: 40px;
+  background-size: cover;
+  background-image: url("../../public/images/arrow.svg"); }
+
+.rank-list {
+  padding-left: 0;
+  list-style: none; }
+  .rank-list li {
+    border: solid 2px #B17D6C;
+    background-color: #F8F0E2;
+    display: flex;
+    border-radius: 15px;
+    padding: 10px;
+    margin-bottom: 15px; }
+    .rank-list li > .icon {
+      margin-right: 10px;
+      width: 80px;
+      flex-shrink: 0; }
+      .rank-list li > .icon img {
+        width: 100%; }
+    .rank-list li .avatar {
+      flex-shrink: 0;
+      height: 80px;
+      width: 80px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 15px;
+      margin-right: 15px; }
+    .rank-list li .name {
+      width: 100%;
+      margin-bottom: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      word-break: break-word; }
+
+.balance {
+  display: inline-flex;
+  background-color: #B17D6C;
+  border-radius: 15px;
+  color: #fff;
+  padding: 2px 10px;
+  align-items: center; }
+  .balance .icon {
+    margin-right: 5px; }
+
+.icon-currency {
+  display: inline-flex;
+  width: 25px;
+  height: 25px;
+  background-image: url("../../public/images/currency.png");
+  background-size: cover;
+  background-position: center; }
+
+.tournament-intro {
+  border: solid 2px #B17D6C;
+  background-color: #F8F0E2;
+  border-radius: 15px;
+  padding: 15px;
+  color: #B17D6C;
+  margin-bottom: 30px; }
+  .tournament-intro .btn-back {
+    margin-top: 10px; }
+  .tournament-intro .content {
+    margin-top: 5px;
+    padding: 15px 30px; }
+  .tournament-intro .NFT {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    margin-right: 15px; }
+  .tournament-intro .name {
+    font-size: 20px;
+    margin-bottom: 10px; }
+  .tournament-intro .balance {
+    font-size: 20px; }
+
+.tournament-item {
+  width: 100%;
+  display: block;
+  padding: 15px;
+  background-color: #F8F0E2;
+  border: solid 2px #B17D6C;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  color: #B17D6C;
+  text-decoration: none;
+  text-align: center;
+  transition: ease all .3s; }
+  .tournament-item:hover {
+    color: #ba8c7d;
+    background-color: #fdfbf7; }
+  .tournament-item > .icon {
+    width: 100%;
+    padding-bottom: 100%;
+    margin-bottom: 15px;
+    background-position: center;
+    background-size: cover;
+    border-radius: 15px; }
+  .tournament-item .name {
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 18px; }
+  .tournament-item .time {
+    margin-bottom: 5px; }
+
+.title-s {
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: normal;
+  color: #B17D6C; }
+
+.game-block {
+  background-color: #fff;
+  width: 100%;
+  border-radius: 15px;
+  border: solid 3px #B17D6C;
+  margin-bottom: 30px; }
+
+/******Button*******/
+.btn-main {
+  background-color: #4165e8;
+  color: #fff;
+  border-radius: 15px; }
+  .btn-main:hover {
+    color: #fff;
+    background-color: #6e8aee; }
+  .btn-main:active {
+    color: #fff;
+    background-color: #1b44db; }
+
+.btn-sub {
+  border-radius: 15px;
+  color: #fff;
+  background-color: #FF9B63; }
+  .btn-sub:hover {
+    color: #fff;
+    background-color: #ffbc96; }
+  .btn-sub:active {
+    color: #fff;
+    background-color: #ff7a30; }
+
+.btn.btn-bet {
+  width: 100%;
+  margin-bottom: 15px; }
+
+.btn-remove {
+  padding: 5px; }
+  .btn-remove:hover {
+    background-color: #4165e8;
+    color: #fff; }
+  .btn-remove:active {
+    color: #fff;
+    background-color: #1b44db; }
+
+.btn-clear {
+  font-size: 24px;
+  padding: 0 10px; }
+
+.btn-more {
+  width: 100%;
+  margin-bottom: 15px; }
+
+@media (max-width: 768px) {
+  .ball-list li .teamBet {
+    flex-wrap: wrap; }
+    .ball-list li .teamBet > .ball-check {
+      width: 100%;
+      margin: 0;
+      margin-bottom: 8px; }
+      .ball-list li .teamBet > .ball-check:first-child {
+        margin-right: 0; }
+      .ball-list li .teamBet > .ball-check:last-child {
+        margin-left: 0; }
+  .ball-list li .info {
+    flex-wrap: wrap; }
+  .ball-list li .btnGroup {
+    flex-shrink: 0; } }
+
+.hide {
+  display: none; }
+
+.modal-main .modal-content {
+  background-color: #F8F0E2;
+  border-radius: 15px; }
+
+  .checkModal{
+    border: 2px solid;
+    border-color: #B17D6C;
+  }
+
+  .card{
+    border: 4px solid;
+    border-color: #B17D6C;
+    border-radius: 30px;
+    color: #B17D6C;
+  }
+
+  .card-img-top{
+    border-radius: 20px;
+  }
+
+  .card-title{
+    font-size: 40px;
+  }
+
+  .wrap{
+    display: flex;
+    justify-content: center;
+  }
+
+  .balance{
+    width: 150px;
+    display: flex;
+    justify-content: center;
+  }
+

@@ -1,5 +1,59 @@
 [
    {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"target",
+            "type":"address"
+         }
+      ],
+      "name":"AddressEmptyCode",
+      "type":"error"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"implementation",
+            "type":"address"
+         }
+      ],
+      "name":"ERC1967InvalidImplementation",
+      "type":"error"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"ERC1967NonPayable",
+      "type":"error"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"FailedInnerCall",
+      "type":"error"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"UUPSUnauthorizedCallContext",
+      "type":"error"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"bytes32",
+            "name":"slot",
+            "type":"bytes32"
+         }
+      ],
+      "name":"UUPSUnsupportedProxiableUUID",
+      "type":"error"
+   },
+   {
       "anonymous":false,
       "inputs":[
          {
@@ -46,19 +100,81 @@
          },
          {
             "indexed":false,
-            "internalType":"enum Baccarat.PairOutcome",
+            "internalType":"uint256",
             "name":"pairOutcome",
-            "type":"uint8"
+            "type":"uint256"
          },
          {
             "indexed":false,
-            "internalType":"enum Baccarat.GameOutcome",
+            "internalType":"uint256",
             "name":"gameOutcome",
-            "type":"uint8"
+            "type":"uint256"
          }
       ],
       "name":"BetResult",
       "type":"event"
+   },
+   {
+      "anonymous":false,
+      "inputs":[
+         {
+            "indexed":true,
+            "internalType":"address",
+            "name":"previousOwner",
+            "type":"address"
+         },
+         {
+            "indexed":true,
+            "internalType":"address",
+            "name":"newOwner",
+            "type":"address"
+         }
+      ],
+      "name":"OwnershipTransferred",
+      "type":"event"
+   },
+   {
+      "anonymous":false,
+      "inputs":[
+         {
+            "indexed":true,
+            "internalType":"address",
+            "name":"implementation",
+            "type":"address"
+         }
+      ],
+      "name":"Upgraded",
+      "type":"event"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"BANKER_PAIR_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"BANKER_WIN_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
    },
    {
       "inputs":[
@@ -79,41 +195,101 @@
       "inputs":[
          
       ],
+      "name":"PLAYER_PAIR_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"PLAYER_WIN_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"PassTokenId",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"RATE_DECIMALS",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"TIE_RATE",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"UPGRADE_INTERFACE_VERSION",
+      "outputs":[
+         {
+            "internalType":"string",
+            "name":"",
+            "type":"string"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
       "name":"addPlayer",
       "outputs":[
          
       ],
       "stateMutability":"nonpayable",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"bankerPairRate",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"bankerWinRate",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
       "type":"function"
    },
    {
@@ -152,14 +328,14 @@
             "type":"uint256"
          },
          {
-            "internalType":"enum Baccarat.PairOutcome",
-            "name":"pairOutcome",
-            "type":"uint8"
+            "internalType":"uint256",
+            "name":"pairResult",
+            "type":"uint256"
          },
          {
-            "internalType":"enum Baccarat.GameOutcome",
-            "name":"gameOutcome",
-            "type":"uint8"
+            "internalType":"uint256",
+            "name":"gameResult",
+            "type":"uint256"
          }
       ],
       "stateMutability":"nonpayable",
@@ -169,7 +345,63 @@
       "inputs":[
          
       ],
-      "name":"betResult",
+      "name":"claimNft",
+      "outputs":[
+         
+      ],
+      "stateMutability":"nonpayable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"claimReward",
+      "outputs":[
+         
+      ],
+      "stateMutability":"nonpayable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"",
+            "type":"address"
+         }
+      ],
+      "name":"claimed",
+      "outputs":[
+         {
+            "internalType":"bool",
+            "name":"",
+            "type":"bool"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"endTime",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"getBetResult",
       "outputs":[
          {
             "internalType":"enum Baccarat.GameOutcome",
@@ -184,7 +416,7 @@
       "inputs":[
          
       ],
-      "name":"pairResult",
+      "name":"getPairResult",
       "outputs":[
          {
             "internalType":"enum Baccarat.PairOutcome",
@@ -197,14 +429,137 @@
    },
    {
       "inputs":[
-         
-      ],
-      "name":"playerPairRate",
-      "outputs":[
+         {
+            "internalType":"address",
+            "name":"_passNftAddress",
+            "type":"address"
+         },
+         {
+            "internalType":"address",
+            "name":"_rewardTokenAddress",
+            "type":"address"
+         },
          {
             "internalType":"uint256",
-            "name":"",
+            "name":"_rewardTokenAmount",
             "type":"uint256"
+         },
+         {
+            "internalType":"uint256",
+            "name":"_endDay",
+            "type":"uint256"
+         }
+      ],
+      "name":"initialize",
+      "outputs":[
+         
+      ],
+      "stateMutability":"nonpayable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"initialized",
+      "outputs":[
+         {
+            "internalType":"bool",
+            "name":"",
+            "type":"bool"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"operator",
+            "type":"address"
+         },
+         {
+            "internalType":"address",
+            "name":"from",
+            "type":"address"
+         },
+         {
+            "internalType":"uint256[]",
+            "name":"ids",
+            "type":"uint256[]"
+         },
+         {
+            "internalType":"uint256[]",
+            "name":"values",
+            "type":"uint256[]"
+         },
+         {
+            "internalType":"bytes",
+            "name":"data",
+            "type":"bytes"
+         }
+      ],
+      "name":"onERC1155BatchReceived",
+      "outputs":[
+         {
+            "internalType":"bytes4",
+            "name":"",
+            "type":"bytes4"
+         }
+      ],
+      "stateMutability":"nonpayable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"operator",
+            "type":"address"
+         },
+         {
+            "internalType":"address",
+            "name":"from",
+            "type":"address"
+         },
+         {
+            "internalType":"uint256",
+            "name":"id",
+            "type":"uint256"
+         },
+         {
+            "internalType":"uint256",
+            "name":"value",
+            "type":"uint256"
+         },
+         {
+            "internalType":"bytes",
+            "name":"data",
+            "type":"bytes"
+         }
+      ],
+      "name":"onERC1155Received",
+      "outputs":[
+         {
+            "internalType":"bytes4",
+            "name":"",
+            "type":"bytes4"
+         }
+      ],
+      "stateMutability":"nonpayable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"owner",
+      "outputs":[
+         {
+            "internalType":"address",
+            "name":"",
+            "type":"address"
          }
       ],
       "stateMutability":"view",
@@ -214,12 +569,12 @@
       "inputs":[
          
       ],
-      "name":"playerWinRate",
+      "name":"passNftAddress",
       "outputs":[
          {
-            "internalType":"uint256",
+            "internalType":"address",
             "name":"",
-            "type":"uint256"
+            "type":"address"
          }
       ],
       "stateMutability":"view",
@@ -248,7 +603,26 @@
       "inputs":[
          
       ],
-      "name":"rateDecimals",
+      "name":"proxiableUUID",
+      "outputs":[
+         {
+            "internalType":"bytes32",
+            "name":"",
+            "type":"bytes32"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"player",
+            "type":"address"
+         }
+      ],
+      "name":"rankInTopThree",
       "outputs":[
          {
             "internalType":"uint256",
@@ -263,12 +637,76 @@
       "inputs":[
          
       ],
-      "name":"tieRate",
+      "name":"renounceOwnership",
+      "outputs":[
+         
+      ],
+      "stateMutability":"nonpayable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"uint256",
+            "name":"rank",
+            "type":"uint256"
+         }
+      ],
+      "name":"reward",
       "outputs":[
          {
             "internalType":"uint256",
             "name":"",
             "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"rewardTokenAddress",
+      "outputs":[
+         {
+            "internalType":"address",
+            "name":"",
+            "type":"address"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         
+      ],
+      "name":"rewardTokenAmount",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"bytes4",
+            "name":"interfaceId",
+            "type":"bytes4"
+         }
+      ],
+      "name":"supportsInterface",
+      "outputs":[
+         {
+            "internalType":"bool",
+            "name":"",
+            "type":"bool"
          }
       ],
       "stateMutability":"view",
@@ -288,6 +726,60 @@
             "internalType":"address",
             "name":"",
             "type":"address"
+         }
+      ],
+      "stateMutability":"view",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"newOwner",
+            "type":"address"
+         }
+      ],
+      "name":"transferOwnership",
+      "outputs":[
+         
+      ],
+      "stateMutability":"nonpayable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"newImplementation",
+            "type":"address"
+         },
+         {
+            "internalType":"bytes",
+            "name":"data",
+            "type":"bytes"
+         }
+      ],
+      "name":"upgradeToAndCall",
+      "outputs":[
+         
+      ],
+      "stateMutability":"payable",
+      "type":"function"
+   },
+   {
+      "inputs":[
+         {
+            "internalType":"address",
+            "name":"",
+            "type":"address"
+         }
+      ],
+      "name":"usedPassCount",
+      "outputs":[
+         {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
          }
       ],
       "stateMutability":"view",
