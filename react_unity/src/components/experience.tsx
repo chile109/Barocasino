@@ -15,8 +15,8 @@ const Experience = () => {
     const gameResult: GameResult = generateBaccaratResult(target);
     unityContext.send(
       'BrowserBridge',
-      'GetPalyerShowCard',
-      JSON.stringify(gameResult.bankerCards)
+      'GetPlayerShowCard',
+      '{"Items": [{"Suit":"Club","Number":11,"IsSpecialCard":false,"SpecialCardData":null},{"Suit":"Heart","Number":10,"IsSpecialCard":false,"SpecialCardData":null}] }'
     );
   };
 
@@ -35,7 +35,7 @@ const Experience = () => {
     const gameResult: GameResult = generateBaccaratResult(target);
     unityContext.send(
       'BrowserBridge',
-      'GetPalyerShowCard',
+      'GetPlayerShowCard',
       JSON.stringify(gameResult.playerCards)
     );
     unityContext.send(
