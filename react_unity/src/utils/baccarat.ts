@@ -8,7 +8,7 @@ export function getRandomNumber(): number {
 
 // 函數：取得一個隨機花色
 export function getRandomSuit(): string {
-  const suits: string[] = ["Spades", "Hearts", "Diamonds", "Clubs"];
+  const suits: string[] = ["Spade", "Heart", "Diamond", "Club"];
   const randomIndex: number = Math.floor(Math.random() * suits.length);
   const result: string = suits[randomIndex];
   // console.log(`結果：${result}，這是 getRandomSuit() 函數`);

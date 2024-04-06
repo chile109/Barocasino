@@ -10,23 +10,27 @@ const unityContext = new UnityContext({
 });
 const Experience = () => {
 
-  const sendPlayerCard = () => {
-    const target = 'Player';
-    const gameResult: GameResult = generateBaccaratResult(target);
-    unityContext.send(
-      'BrowserBridge',
-      'GetPlayerShowCard',
-      '{"Items": [{"Suit":"Club","Number":11,"IsSpecialCard":false,"SpecialCardData":null},{"Suit":"Heart","Number":10,"IsSpecialCard":false,"SpecialCardData":null}] }'
-    );
-  };
-
   const sendBankerCard = () => {
     const target = 'Banker';
     const gameResult: GameResult = generateBaccaratResult(target);
+    console.log('Banker gameResult', gameResult);
+    console.log('Banker gameResult', JSON.stringify(gameResult.bankerCards));
     unityContext.send(
       'BrowserBridge',
       'GetBankerShowCard',
-      JSON.stringify(gameResult.playerCards)
+      `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
+    );
+  };
+
+  const sendPlayerCard = () => {
+    const target = 'Player';
+    const gameResult: GameResult = generateBaccaratResult(target);
+    console.log('Player gameResult', gameResult);
+    console.log('Player gameResult', JSON.stringify(gameResult.playerCards));
+    unityContext.send(
+      'BrowserBridge',
+      'GetPlayerShowCard',
+      `{"Items": ${JSON.stringify(gameResult.playerCards)}}`
     );
   };
 
@@ -41,16 +45,16 @@ const Experience = () => {
     unityContext.send(
       'BrowserBridge',
       'GetBankerShowCard',
-      JSON.stringify(gameResult.playerCards)
+      JSON.stringify(gameResult.bankerCards)
     );
   };
 
   useEffect(() => {
     unityContext.on('RequestPlayerShowCard', () => {
-      console.log('unity RequestPlayerShowCard');
+      sendPlayerCard()
     });
     unityContext.on('RequestBankerShowCard', () => {
-      console.log('unity RequestBankerShowCard');
+      sendBankerCard()
     });
   }, []);
 
