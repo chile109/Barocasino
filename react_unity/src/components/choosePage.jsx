@@ -1,38 +1,49 @@
 import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 import './style.css'; // Import your custom CSS file
-import { ethers } from 'ethers';
+// import { ethers } from 'ethers';
 import { bacaratAddress } from '../../src/assets/definitions/constants/bacarat'
-import BacaratAddress from '../../src/assets/definitions/abi/barcarat.json'
+import BacaratABI from '../../src/assets/definitions/abi/barcarat.json'
 import NFT1 from '../../src/assets/images/NFT1.png'
 import CheckModal from './checkModal'
 import { useAccount } from 'wagmi'
+import { createPublicClient, http } from 'viem'
+import { optimism } from 'viem/chains'
+
+const client = createPublicClient({
+  chain: optimism,
+  transport: http(),
+})
 
 const ChooseGame = () => {
-    const { address } = useAccount()
-    const [userPoint, setUserPoint] = useState(0)
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const [showModal, setShowModal] = useState(false);
+  const { address } = useAccount()
+  const [userPoint, setUserPoint] = useState(0)
+  
+  const [showModal, setShowModal] = useState(false);
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
 
-    const getLogin = async () => {
-      const contractBacarat = new ethers.Contract(
-        bacaratAddress,
-        BacaratAddress,
-        signer,
-      );
-      const user = await contractBacarat.players(address)
-      setUserPoint(user.toString())
-    }
+  const getLogin = async () => {
+    try{
+      const userPoint = await client.readContract({
+        address: bacaratAddress,
+        abi: BacaratABI,
+        functionName: 'players',
+        args: [address],
+      })
 
-    useEffect(() => {
-      if(address && address.length > 0){
-        getLogin()
-      }
-    }, [address])
+      setUserPoint(userPoint.toString())
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    if(address && address.length > 0){
+      getLogin()
+    }
+  }, [address])
 
   return (
     <div>
