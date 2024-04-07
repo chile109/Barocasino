@@ -7,8 +7,9 @@ import { useAccount } from 'wagmi'
 import { ethers } from 'ethers';
 import './style.css'
 import { useNavigate } from "react-router-dom";
-import { createPublicClient, http, createWalletClient } from 'viem'
+import { createPublicClient, custom, http, createWalletClient } from 'viem'
 import { mainnet, optimism } from 'viem/chains'
+import { useWriteContract } from 'wagmi'
 
 const client = createPublicClient({
   chain: optimism,
@@ -17,18 +18,16 @@ const client = createPublicClient({
 
 export const walletClient = createWalletClient({
   chain: optimism,
-  transport:  http(),
+  transport:  custom(window.ethereum)
 })
 
 function CheckModal(props) {
   const { show, onHide } = props;
   const { address } = useAccount()
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
   const navigate = useNavigate()
   
-    // Create a signer to interact with the contract
-  
   const checkNFTTransfer = async () => {
+    const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
     const checkBal = await client.readContract({
       address: nftAddress,
@@ -37,25 +36,6 @@ function CheckModal(props) {
       args: [address, 0],
     })
 
-    // console.log('checkBal', checkBal)
-
-    // const signer = provider.getSigner();
-
-    // const contractBacarat = new ethers.Contract(
-    //   bacaratAddress,
-    //   BacaratAddress,
-    //   signer,
-    // );
-
-    // const contractNFT = new ethers.Contract(
-    //   nftAddress,
-    //   NFTAddress,
-    //   signer,
-    // );
-
-    // const checkBal = await contractNFT.balanceOf(address, 0)
-    // console.log('checkBal', checkBal)
-
     // check user NFT =
     // check NFT transfer to host
     // add player
@@ -63,41 +43,36 @@ function CheckModal(props) {
     // check user NFT == 1
     // check NFT 
     if(checkBal.toString() !== '0'){
-      // const checkApproval = await contractNFT.isApprovedForAll(address, nftAddress)
       
       const checkApproval = await client.readContract({
         address: nftAddress,
         abi: NFTABI,
         functionName: 'isApprovedForAll',
-        args: [address, nftAddress],
+        args: [address, bacaratAddress],
       })
 
-      // console.log('checkApproval', checkApproval)
       if(!checkApproval){
-
-        const { request } = await client.simulateContract({
-          address,
+        const { request: request1 } = await client.simulateContract({
+          account, 
           address: nftAddress,
           abi: NFTABI,
           functionName: 'setApprovalForAll',
-          args: [nftAddress, true],
+          args: [bacaratAddress, true],
+          gas: 500000n, 
+          chain: optimism, 
         })
-        await walletClient.writeContract(request)
 
-        // await contractNFT.setApprovalForAll(nftAddress, true)
-
-        // Call the addPlayer function to add a new player
-        // const tx = await contractBacarat.addPlayer({ gasLimit: 500000 });
-        // await tx.wait(); // Wait for the transaction to be mined
-
-        const { requests } = await client.simulateContract({
-          address,
+        await walletClient.writeContract(request1)
+        
+        const { request: request2 } = await client.simulateContract({
+          account, 
           address: bacaratAddress,
           abi: BacaratABI,
           functionName: 'addPlayer',
+          gas: 500000n, 
+          chain: optimism, 
         })
-        await walletClient.writeContract(requests)
-
+        await walletClient.writeContract(request2)
       }
       navigate('/game')
     }

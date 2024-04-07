@@ -56,6 +56,9 @@ const Experience = () => {
     unityContext.on('RequestBankerShowCard', () => {
       sendBankerCard()
     });
+    unityContext.on('BetCallBack', () => {
+      console.log('BetCallBack');
+    })
   }, []);
 
   return (
