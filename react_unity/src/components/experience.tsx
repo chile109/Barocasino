@@ -1,6 +1,20 @@
 import { generateBaccaratResult, type GameResult } from '../utils/baccarat';
 import Unity, { UnityContext } from 'react-unity-webgl';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPublicClient, custom, http, createWalletClient, Address } from 'viem'
+import { optimism } from 'viem/chains'
+import { bacaratAddress } from '../assets/definitions/constants/bacarat'
+import BacaratABI from '../assets/definitions/abi/barcarat.json'
+
+export const client = createPublicClient({
+  chain: optimism,
+  transport: http(),
+})
+
+export const walletClient = createWalletClient({
+  chain: optimism,
+  transport:  custom(window.ethereum)
+})
 
 const unityContext = new UnityContext({
   loaderUrl: "UnityBuild/Barocasino.loader.js",
@@ -8,13 +22,17 @@ const unityContext = new UnityContext({
   frameworkUrl: "UnityBuild/Barocasino.framework.js",
   codeUrl: "UnityBuild/Barocasino.wasm",
 });
+
 const Experience = () => {
+  // const [betMoney, setBetMoney] = useState({ playerWin: 0, bankerWin: 0, Tie: 0, playerPair: 0, bankerPair: 0 })
+  const [betResult, setBetResult] = useState({
+    result: 'Lose',
+    earn: '0',
+  })
 
   const sendBankerCard = () => {
     const target = 'Banker';
     const gameResult: GameResult = generateBaccaratResult(target);
-    console.log('Banker gameResult', gameResult);
-    console.log('Banker gameResult', JSON.stringify(gameResult.bankerCards));
     unityContext.send(
       'BrowserBridge',
       'GetBankerShowCard',
@@ -25,8 +43,8 @@ const Experience = () => {
   const sendPlayerCard = () => {
     const target = 'Player';
     const gameResult: GameResult = generateBaccaratResult(target);
-    console.log('Player gameResult', gameResult);
-    console.log('Player gameResult', JSON.stringify(gameResult.playerCards));
+    // console.log('Player gameResult', gameResult);
+    // console.log('Player gameResult', JSON.stringify(gameResult.playerCards));
     unityContext.send(
       'BrowserBridge',
       'GetPlayerShowCard',
@@ -49,6 +67,113 @@ const Experience = () => {
     );
   };
 
+  const betUser = async (player: number, banker: number, tie: number, playerPair: number, bankerPair: number) => {
+    const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    /* global BigInt */ 
+    const { request } = await client.simulateContract({
+      account: account as Address, 
+      address: bacaratAddress as Address,
+      abi: BacaratABI,
+      functionName: 'bet',
+      args: [player, banker, tie, playerPair, bankerPair],
+      gas: BigInt(100000), 
+      chain: optimism, 
+    })
+    await walletClient.writeContract(request)
+
+    // const result = await contractBacarat.bet(betMoney.Tie, betMoney.bankerWin, betMoney.bankerPair, betMoney.playerPair, betMoney.playerWin);
+    // const receipt = await result.wait();
+
+    const logs = await client.getLogs({
+      address: bacaratAddress,
+      event: {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "bettor",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "playerWin",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "backerWin",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "Tie",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "playerPair",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "bankerPair",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "winAmount",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "pairOutcome",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "gameOutcome",
+            "type": "uint256"
+          }
+        ],
+        "name": "BetResult",
+        "type": "event"
+      },
+      // args: {
+      //   from: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
+      //   to: '0xa5cc3c03994db5b0d9a5eedd10cabab0813678ac'
+      // },
+      fromBlock: BigInt(117808743),
+      toBlock: "latest",
+
+    });
+
+    let betTotalMoney = player + banker + tie + playerPair + bankerPair
+
+    let results = logs[logs.length - 1]
+    let resultMoney = results?.args?.winAmount?.toString()
+
+    if (results?.args?.winAmount?.toString() === '0') {
+      setBetResult({
+        result: 'Lose',
+        earn: `${betTotalMoney}`,
+      })
+    } else {
+      setBetResult({
+        result: 'Win',
+        earn: resultMoney ? resultMoney : '0',
+      })
+    }
+  }
+
   useEffect(() => {
     unityContext.on('RequestPlayerShowCard', () => {
       sendPlayerCard()
@@ -56,9 +181,15 @@ const Experience = () => {
     unityContext.on('RequestBankerShowCard', () => {
       sendBankerCard()
     });
-    unityContext.on('BetCallBack', () => {
-      console.log('BetCallBack');
-    })
+    unityContext.on(
+      "BetCallback",
+      (player, banker, tie, playerPair, bankerPair) => {
+        betUser(player, banker, tie, playerPair, bankerPair)
+      }
+    );
+    // Before navigation or modal close
+    unityContext.quitUnityInstance()
+    unityContext.removeAllEventListeners()
   }, []);
 
   return (
@@ -74,6 +205,8 @@ const Experience = () => {
       <button onClick={sendPlayerCard}>send player card</button>
       <button onClick={sendBankerCard}>send banker card</button>
       <button onClick={sendAllCard}>send all card</button>
+      {/* <button onClick={betUser}>Bet</button> */}
+      <p>{betResult.result} {betResult.earn}</p>
     </div>
   );
 };
