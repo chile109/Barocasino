@@ -21,10 +21,10 @@
     "react-router-dom": "^6.22.3",
     "react-scripts": "5.0.1",
     "react-unity-webgl": "^8.7.4",
-    "typescript": "5.4.2",
+    "typescript": "^5.0.4",
     "util": "0.12.4",
     "viem": "2.x",
-    "wagmi": "^2.5.12",
+    "wagmi": "^2.5.17",
     "web-vitals": "^2.1.4",
     "zustand": "^4.5.2"
   },
