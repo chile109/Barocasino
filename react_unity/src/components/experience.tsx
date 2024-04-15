@@ -52,20 +52,25 @@ const Experience = () => {
     );
   };
 
-  const sendAllCard = () => {
-    const target = 'Banker';
-    const gameResult: GameResult = generateBaccaratResult(target);
+  async function sendResult(result: string) {
+    const gameResult: GameResult = generateBaccaratResult(result);
+
     unityContext.send(
       'BrowserBridge',
       'GetPlayerShowCard',
-      JSON.stringify(gameResult.playerCards)
+      `{"Items": ${JSON.stringify(gameResult.playerCards)}}`
     );
+
+    //await 1 sec
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     unityContext.send(
       'BrowserBridge',
       'GetBankerShowCard',
-      JSON.stringify(gameResult.bankerCards)
+      `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
     );
-  };
+
+  }
 
   const betUser = async (player: number, banker: number, tie: number, playerPair: number, bankerPair: number) => {
     const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -204,7 +209,7 @@ const Experience = () => {
       </div>
       <button onClick={sendPlayerCard}>send player card</button>
       <button onClick={sendBankerCard}>send banker card</button>
-      <button onClick={sendAllCard}>send all card</button>
+      <button onClick={sendResult.bind(this, 'Player')}>send result</button>
       {/* <button onClick={betUser}>Bet</button> */}
       <p>{betResult.result} {betResult.earn}</p>
     </div>
