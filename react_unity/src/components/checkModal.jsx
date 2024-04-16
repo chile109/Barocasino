@@ -8,16 +8,16 @@ import { ethers } from 'ethers';
 import './style.css'
 import { useNavigate } from "react-router-dom";
 import { createPublicClient, custom, http, createWalletClient } from 'viem'
-import { mainnet, optimism } from 'viem/chains'
+import { mainnet, sepolia } from 'viem/chains'
 import { useWriteContract } from 'wagmi'
 
 const client = createPublicClient({
-  chain: optimism,
+  chain: sepolia,
   transport: http(),
 })
 
 export const walletClient = createWalletClient({
-  chain: optimism,
+  chain: sepolia,
   transport:  custom(window.ethereum)
 })
 
@@ -35,6 +35,8 @@ function CheckModal(props) {
       functionName: 'balanceOf',
       args: [address, 0],
     })
+    
+    console.log('checkBal:' + checkBal.toString());
 
     // check user NFT =
     // check NFT transfer to host
@@ -59,8 +61,10 @@ function CheckModal(props) {
           functionName: 'setApprovalForAll',
           args: [bacaratAddress, true],
           gas: 500000n, 
-          chain: optimism, 
+          chain: sepolia, 
         })
+
+        console.log('testxxxxx:' + request1);
 
         await walletClient.writeContract(request1)
         
@@ -70,7 +74,7 @@ function CheckModal(props) {
           abi: BacaratABI,
           functionName: 'addPlayer',
           gas: 500000n, 
-          chain: optimism, 
+          chain: sepolia, 
         })
         await walletClient.writeContract(request2)
       }

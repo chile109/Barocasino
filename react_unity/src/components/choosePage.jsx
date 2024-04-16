@@ -8,10 +8,10 @@ import NFT1 from '../../src/assets/images/NFT1.png'
 import CheckModal from './checkModal'
 import { useAccount } from 'wagmi'
 import { createPublicClient, http } from 'viem'
-import { optimism } from 'viem/chains'
+import { sepolia } from 'viem/chains'
 
 const client = createPublicClient({
-  chain: optimism,
+  chain: sepolia,
   transport: http(),
 })
 
@@ -32,6 +32,8 @@ const ChooseGame = () => {
         functionName: 'players',
         args: [address],
       })
+
+      console.log('userPoint:' + userPoint.toString());
 
       setUserPoint(userPoint.toString())
     }catch(err){

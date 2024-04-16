@@ -2,17 +2,17 @@ import { generateBaccaratResult, type GameResult } from '../utils/baccarat';
 import Unity, { UnityContext } from 'react-unity-webgl';
 import React, { useEffect, useState } from 'react';
 import { createPublicClient, custom, http, createWalletClient, Address } from 'viem'
-import { optimism } from 'viem/chains'
+import { optimism, sepolia } from 'viem/chains'
 import { bacaratAddress } from '../assets/definitions/constants/bacarat'
 import BacaratABI from '../assets/definitions/abi/barcarat.json'
 
 export const client = createPublicClient({
-  chain: optimism,
+  chain: sepolia,
   transport: http(),
 })
 
 export const walletClient = createWalletClient({
-  chain: optimism,
+  chain: sepolia,
   transport:  custom(window.ethereum)
 })
 
@@ -82,7 +82,7 @@ const Experience = () => {
       functionName: 'bet',
       args: [player, banker, tie, playerPair, bankerPair],
       gas: BigInt(100000), 
-      chain: optimism, 
+      chain: sepolia, 
     })
     await walletClient.writeContract(request)
 
