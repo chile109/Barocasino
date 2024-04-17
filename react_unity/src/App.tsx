@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 // import { nftAddress } from '../src/assets/definitions/constants/NFT'
 // import NFTABI from '../src/assets/definitions/abi/NFT.json'
 import { createPublicClient, http } from 'viem';
-import { optimism } from 'viem/chains';
+import { sepolia } from 'viem/chains';
 import ChooseGame from './components/choosePage'
 import EnterGame from './components/enterPage'
 import GameDeck from './components/gameDeck'
@@ -18,7 +18,7 @@ import { Routes, Route } from 'react-router-dom'
 
 
 export const publicClient = createPublicClient({
-  chain: optimism,
+  chain: sepolia,
   transport: http(
     'https://opt-mainnet.g.alchemy.com/v2/Vu6asWumE3Ozc3vkSRy7Uya0q-G5NLYR'
   )
