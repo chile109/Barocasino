@@ -7,19 +7,10 @@ import { useAccount } from 'wagmi'
 import { ethers } from 'ethers';
 import './style.css'
 import { useNavigate } from "react-router-dom";
-import { createPublicClient, custom, http, createWalletClient } from 'viem'
 import { mainnet, sepolia } from 'viem/chains'
 import { useWriteContract } from 'wagmi'
+import { client, walletClient } from '../store/store.ts'
 
-const client = createPublicClient({
-  chain: sepolia,
-  transport: http(),
-})
-
-export const walletClient = createWalletClient({
-  chain: sepolia,
-  transport:  custom(window.ethereum)
-})
 
 function CheckModal(props) {
   const { show, onHide } = props;
@@ -53,7 +44,10 @@ function CheckModal(props) {
         args: [address, bacaratAddress],
       })
 
+      console.log('checkApproval', !checkApproval)
+
       if(!checkApproval){
+        console.log('checkApprovalForTransfer', !checkApproval)
         const { request: request1 } = await client.simulateContract({
           account, 
           address: nftAddress,

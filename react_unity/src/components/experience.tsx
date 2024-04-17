@@ -5,16 +5,7 @@ import { createPublicClient, custom, http, createWalletClient, Address } from 'v
 import { optimism, sepolia } from 'viem/chains'
 import { bacaratAddress } from '../assets/definitions/constants/bacarat'
 import BacaratABI from '../assets/definitions/abi/barcarat.json'
-
-export const client = createPublicClient({
-  chain: sepolia,
-  transport: http(),
-})
-
-export const walletClient = createWalletClient({
-  chain: sepolia,
-  transport:  custom(window.ethereum)
-})
+import { client, walletClient } from '../store/store'
 
 const unityContext = new UnityContext({
   loaderUrl: "UnityBuild/Barocasino.loader.js",
@@ -74,6 +65,7 @@ const Experience = () => {
 
   const betUser = async (player: number, banker: number, tie: number, playerPair: number, bankerPair: number) => {
     const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    console.log(player, banker, tie, playerPair, bankerPair);
     /* global BigInt */ 
     const { request } = await client.simulateContract({
       account: account as Address, 
@@ -156,14 +148,21 @@ const Experience = () => {
       //   from: '0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
       //   to: '0xa5cc3c03994db5b0d9a5eedd10cabab0813678ac'
       // },
-      fromBlock: BigInt(117808743),
+      fromBlock: BigInt(5680397),
       toBlock: "latest",
 
     });
 
     let betTotalMoney = player + banker + tie + playerPair + bankerPair
 
-    let results = logs[logs.length - 1]
+    let results = null;
+    for (let i = logs.length - 1; i >= 0; i--) {
+      if (logs[i]?.args?.bettor?.toLowerCase() === account.toLowerCase()) {
+        results = logs[i];
+        break;
+      }
+    }
+
     let resultMoney = results?.args?.winAmount?.toString()
 
     if (results?.args?.winAmount?.toString() === '0') {
@@ -177,24 +176,19 @@ const Experience = () => {
         earn: resultMoney ? resultMoney : '0',
       })
     }
+
+    sendPlayerCard()
+    sendBankerCard()
   }
 
   useEffect(() => {
-    unityContext.on('RequestPlayerShowCard', () => {
-      sendPlayerCard()
-    });
-    unityContext.on('RequestBankerShowCard', () => {
-      sendBankerCard()
-    });
     unityContext.on(
       "BetCallback",
       (player, banker, tie, playerPair, bankerPair) => {
+        console.log(player, banker, tie, playerPair, bankerPair);
         betUser(player, banker, tie, playerPair, bankerPair)
       }
     );
-    // Before navigation or modal close
-    unityContext.quitUnityInstance()
-    unityContext.removeAllEventListeners()
   }, []);
 
   return (
@@ -207,9 +201,9 @@ const Experience = () => {
             borderRadius: '15px',
           }} />
       </div>
-      <button onClick={sendPlayerCard}>send player card</button>
+      {/* <button onClick={sendPlayerCard}>send player card</button>
       <button onClick={sendBankerCard}>send banker card</button>
-      <button onClick={sendResult.bind(this, 'Player')}>send result</button>
+      <button onClick={sendResult.bind(this, 'Player')}>send result</button> */}
       {/* <button onClick={betUser}>Bet</button> */}
       <p>{betResult.result} {betResult.earn}</p>
     </div>

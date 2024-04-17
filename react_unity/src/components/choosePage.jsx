@@ -7,13 +7,7 @@ import BacaratABI from '../../src/assets/definitions/abi/barcarat.json'
 import NFT1 from '../../src/assets/images/NFT1.png'
 import CheckModal from './checkModal'
 import { useAccount } from 'wagmi'
-import { createPublicClient, http } from 'viem'
-import { sepolia } from 'viem/chains'
-
-const client = createPublicClient({
-  chain: sepolia,
-  transport: http(),
-})
+import { client } from '../store/store.ts'
 
 const ChooseGame = () => {
   const { address } = useAccount()
