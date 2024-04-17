@@ -6,6 +6,8 @@ import { optimism, sepolia } from 'viem/chains'
 import { bacaratAddress } from '../assets/definitions/constants/bacarat'
 import BacaratABI from '../assets/definitions/abi/barcarat.json'
 import { client, walletClient } from '../store/store'
+import { check } from 'prettier';
+import { useAccount } from 'wagmi'
 
 const unityContext = new UnityContext({
   loaderUrl: "UnityBuild/Barocasino.loader.js",
@@ -20,6 +22,7 @@ const Experience = () => {
     result: 'Lose',
     earn: '0',
   })
+  const { address } = useAccount()
 
   const sendBankerCard = () => {
     const target = 'Banker';
@@ -49,7 +52,7 @@ const Experience = () => {
     unityContext.send(
       'BrowserBridge',
       'GetPlayerShowCard',
-      `{"Items": ${JSON.stringify(gameResult.playerCards)}}`
+      `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
     );
 
     //await 1 sec
@@ -58,7 +61,7 @@ const Experience = () => {
     unityContext.send(
       'BrowserBridge',
       'GetBankerShowCard',
-      `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
+      `{"Items": ${JSON.stringify(gameResult.playerCards)}}`
     );
 
   }
@@ -177,9 +180,69 @@ const Experience = () => {
       })
     }
 
-    sendPlayerCard()
-    sendBankerCard()
+    const checkWhoWin = await client.readContract({
+      address: bacaratAddress as Address,
+      abi: BacaratABI,
+      functionName: 'getBetResult',
+    })
+
+
+    enum Result {
+      Player = 1,
+      Banker = 2,
+      Tie = 3,
+    }
+    
+    // const gameResultNumber: number = checkWhoWin;
+    const gameResultString: string = Result[Number(checkWhoWin)].toString();
+    console.log('gameResultString', gameResultString); // Output: Banker
+    // type WhoWin = {
+    //   0: string;
+    //   1: string;
+    //   2: string;
+    // };
+    
+    // const whoWin: WhoWin = {
+    //   0: 'Banker',
+    //   1: 'Player',
+    //   2: 'Tie'
+    // };
+    
+
+    // console.log('checkWhoWin', whoWin[checkWhoWin])
+
+    // let win = whoWin[checkWhoWins] 
+
+    sendResult(gameResultString)    
+
+    const userPoint = await client.readContract({
+      address: bacaratAddress,
+      abi: BacaratABI,
+      functionName: 'players',
+      args: [address],
+    })
+
+    unityContext.send(
+      "BrowserBridge",
+      "GetCredit",
+      String(userPoint)
+    );
   }
+
+  // const init = async() => {
+  //   const userPoint = await client.readContract({
+  //     address: bacaratAddress,
+  //     abi: BacaratABI,
+  //     functionName: 'players',
+  //     args: [address],
+  //   })
+
+  //   unityContext.send(
+  //     "BrowserBridge",
+  //     "GetCredit",
+  //     userPoint.toString()
+  //   );
+  // }
 
   useEffect(() => {
     unityContext.on(

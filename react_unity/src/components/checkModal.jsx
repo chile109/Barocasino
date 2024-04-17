@@ -47,7 +47,7 @@ function CheckModal(props) {
       console.log('checkApproval', !checkApproval)
 
       if(!checkApproval){
-        console.log('checkApprovalForTransfer', !checkApproval)
+        // console.log('checkApprovalForTransfer', !checkApproval)
         const { request: request1 } = await client.simulateContract({
           account, 
           address: nftAddress,
@@ -62,16 +62,22 @@ function CheckModal(props) {
 
         await walletClient.writeContract(request1)
         
-        const { request: request2 } = await client.simulateContract({
-          account, 
-          address: bacaratAddress,
-          abi: BacaratABI,
-          functionName: 'addPlayer',
-          gas: 500000n, 
-          chain: sepolia, 
-        })
-        await walletClient.writeContract(request2)
+        
+        
       }
+
+      const { request: request2 } = await client.simulateContract({
+        account, 
+        address: bacaratAddress,
+        abi: BacaratABI,
+        functionName: 'addPlayer',
+        gas: 500000n, 
+        chain: sepolia, 
+      })
+      await walletClient.writeContract(request2)
+
+     
+
       navigate('/game')
     }
   }
