@@ -7,7 +7,7 @@ import BacaratABI from '../../src/assets/definitions/abi/barcarat.json'
 import NFT1 from '../../src/assets/images/NFT1.png'
 import CheckModal from './checkModal'
 import { useAccount } from 'wagmi'
-import { client } from '../store/store.ts'
+import { client, userPointStore } from '../store/store.ts'
 
 const ChooseGame = () => {
   const { address } = useAccount()
@@ -17,6 +17,7 @@ const ChooseGame = () => {
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
+  const { userPoints, setUserPoints } = userPointStore();
 
   const getLogin = async () => {
     try{
@@ -29,7 +30,7 @@ const ChooseGame = () => {
 
       console.log('userPoint:' + userPoint.toString());
 
-      setUserPoint(userPoint.toString())
+      setUserPoints(String(userPoint))
     }catch(err){
       console.log(err)
     }
@@ -59,7 +60,7 @@ const ChooseGame = () => {
                     <div className="wrap">
                       <div className="balance">
                         <div className="icon">$</div>
-                        <div className="val">{userPoint}</div>
+                        <div className="val">{userPoints}</div>
                       </div>
                     </div>
                     
@@ -92,7 +93,7 @@ const ChooseGame = () => {
                   <div className="wrap w-100">
                       <div className="balance">
                         <div className="icon">$</div>
-                        <div className="val">{userPoint}</div>
+                        <div className="val">{userPoints}</div>
                       </div>
                     </div>
                 </div>

@@ -20,7 +20,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
     "react-scripts": "5.0.1",
-    "react-unity-webgl": "^8.7.4",
+    "react-unity-webgl": "latest",
     "typescript": "^5.0.4",
     "util": "0.12.4",
     "viem": "2.x",

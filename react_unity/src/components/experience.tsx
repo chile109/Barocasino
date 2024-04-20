@@ -1,20 +1,13 @@
 import { generateBaccaratResult, type GameResult } from '../utils/baccarat';
-import Unity, { UnityContext } from 'react-unity-webgl';
-import React, { useEffect, useState } from 'react';
+import { Unity, useUnityContext } from "react-unity-webgl";
+import React, { useEffect, useState, useCallback } from 'react';
 import { createPublicClient, custom, http, createWalletClient, Address } from 'viem'
 import { optimism, sepolia } from 'viem/chains'
 import { bacaratAddress } from '../assets/definitions/constants/bacarat'
 import BacaratABI from '../assets/definitions/abi/barcarat.json'
-import { client, walletClient } from '../store/store'
+import { client, walletClient, userPointStore } from '../store/store'
 import { check } from 'prettier';
 import { useAccount } from 'wagmi'
-
-const unityContext = new UnityContext({
-  loaderUrl: "UnityBuild/Barocasino.loader.js",
-  dataUrl: "UnityBuild/Barocasino.data",
-  frameworkUrl: "UnityBuild/Barocasino.framework.js",
-  codeUrl: "UnityBuild/Barocasino.wasm",
-});
 
 const Experience = () => {
   // const [betMoney, setBetMoney] = useState({ playerWin: 0, bankerWin: 0, Tie: 0, playerPair: 0, bankerPair: 0 })
@@ -22,24 +15,35 @@ const Experience = () => {
     result: 'Lose',
     earn: '0',
   })
+  const [score, setScore] = useState();
   const { address } = useAccount()
+  const { userPoints, setUserPoints } = userPointStore();
+  const { unityProvider, isLoaded, loadingProgression, sendMessage, addEventListener, removeEventListener  } = useUnityContext({
+    loaderUrl: "UnityBuild/Barocasino.loader.js",
+    dataUrl: "UnityBuild/Barocasino.data",
+    frameworkUrl: "UnityBuild/Barocasino.framework.js",
+    codeUrl: "UnityBuild/Barocasino.wasm",
+  });
 
-  const sendBankerCard = () => {
-    const target = 'Banker';
-    const gameResult: GameResult = generateBaccaratResult(target);
-    unityContext.send(
-      'BrowserBridge',
-      'GetBankerShowCard',
-      `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
-    );
-  };
+  // console.log('isLoaded', isLoaded)
+  
+  // console.log('unityContext', isLoaded)
+  // const sendBankerCard = () => {
+  //   const target = 'Banker';
+  //   const gameResult: GameResult = generateBaccaratResult(target);
+  //   unityContext.send(
+  //     'BrowserBridge',
+  //     'GetBankerShowCard',
+  //     `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
+  //   );
+  // };
 
   const sendPlayerCard = () => {
     const target = 'Player';
     const gameResult: GameResult = generateBaccaratResult(target);
-    // console.log('Player gameResult', gameResult);
+    console.log('Player gameResult', gameResult);
     // console.log('Player gameResult', JSON.stringify(gameResult.playerCards));
-    unityContext.send(
+    sendMessage(
       'BrowserBridge',
       'GetPlayerShowCard',
       `{"Items": ${JSON.stringify(gameResult.playerCards)}}`
@@ -49,16 +53,25 @@ const Experience = () => {
   async function sendResult(result: string) {
     const gameResult: GameResult = generateBaccaratResult(result);
 
-    unityContext.send(
+    // unityContext.send(
+    //   'BrowserBridge',
+    //   'GetPlayerShowCard',
+    //   `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
+    // );
+    console.log('gameResult', gameResult.bankerCards)
+    //await  sec
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    sendMessage(
       'BrowserBridge',
       'GetPlayerShowCard',
       `{"Items": ${JSON.stringify(gameResult.bankerCards)}}`
-    );
+    )
 
     //await 1 sec
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    unityContext.send(
+    sendMessage(
       'BrowserBridge',
       'GetBankerShowCard',
       `{"Items": ${JSON.stringify(gameResult.playerCards)}}`
@@ -68,10 +81,9 @@ const Experience = () => {
 
   const betUser = async (player: number, banker: number, tie: number, playerPair: number, bankerPair: number) => {
     const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    console.log(player, banker, tie, playerPair, bankerPair);
-    /* global BigInt */ 
+
     const { request } = await client.simulateContract({
-      account: account as Address, 
+      account: account as Address,
       address: bacaratAddress as Address,
       abi: BacaratABI,
       functionName: 'bet',
@@ -195,79 +207,112 @@ const Experience = () => {
     
     // const gameResultNumber: number = checkWhoWin;
     const gameResultString: string = Result[Number(checkWhoWin)].toString();
-    console.log('gameResultString', gameResultString); // Output: Banker
-    // type WhoWin = {
-    //   0: string;
-    //   1: string;
-    //   2: string;
-    // };
-    
-    // const whoWin: WhoWin = {
-    //   0: 'Banker',
-    //   1: 'Player',
-    //   2: 'Tie'
-    // };
-    
-
-    // console.log('checkWhoWin', whoWin[checkWhoWin])
-
-    // let win = whoWin[checkWhoWins] 
 
     sendResult(gameResultString)    
 
-    const userPoint = await client.readContract({
-      address: bacaratAddress,
-      abi: BacaratABI,
-      functionName: 'players',
-      args: [address],
-    })
+    // const userPoint = await client.readContract({
+    //   address: bacaratAddress,
+    //   abi: BacaratABI,
+    //   functionName: 'players',
+    //   args: [address],
+    // })
 
-    unityContext.send(
+    // sendMessage(
+    //   "BrowserBridge",
+    //   "GetCredit",
+    //   String(userPoints)
+    // );
+  }
+
+  const handleGetBet = useCallback((player: any, banker: any, tie: any, playerPair: any, bankerPair: any) => {
+    betUser(player, banker, tie, playerPair, bankerPair)
+  }, []);
+
+  useEffect(() => {
+    addEventListener("BetCallback", handleGetBet);
+    return () => {
+      removeEventListener("BetCallback", handleGetBet);
+    };
+  }, [addEventListener, removeEventListener, handleGetBet]);
+
+  useEffect(() => {
+    console.log(loadingProgression, loadingProgression === 1, isLoaded)
+    if(loadingProgression === 1){
+      console.log('userPoints', String(userPoints))
+
+      console.log('sendMessage', sendMessage)
+      // sendMessage(
+      //   "BrowserBridge",
+      //   "GetCredit",
+      //   String(userPoints)
+      // );
+
+      init()
+    }
+  }, [isLoaded])
+
+  const init = async() => {
+    // const userPoint = await client.readContract({
+    //   address: bacaratAddress,
+    //   abi: BacaratABI,
+    //   functionName: 'players',
+    //   args: [address],
+    // })
+
+    console.log('init', init)
+    await new Promise((resolve) => setTimeout(resolve, 3000)); 
+
+    sendMessage(
       "BrowserBridge",
       "GetCredit",
-      String(userPoint)
+      // String(userPoint)
+      userPoints
     );
   }
 
-  // const init = async() => {
-  //   const userPoint = await client.readContract({
-  //     address: bacaratAddress,
-  //     abi: BacaratABI,
-  //     functionName: 'players',
-  //     args: [address],
-  //   })
-
-  //   unityContext.send(
-  //     "BrowserBridge",
-  //     "GetCredit",
-  //     userPoint.toString()
+  // useEffect(() => {
+  //   unityContext.on(
+  //     "BetCallback",
+  //     (player, banker, tie, playerPair, bankerPair) => {
+  //       console.log(player, banker, tie, playerPair, bankerPair);
+  //       betUser(player, banker, tie, playerPair, bankerPair)
+  //     }
   //   );
-  // }
+  // }, []);
 
-  useEffect(() => {
-    unityContext.on(
-      "BetCallback",
-      (player, banker, tie, playerPair, bankerPair) => {
-        console.log(player, banker, tie, playerPair, bankerPair);
-        betUser(player, banker, tie, playerPair, bankerPair)
-      }
-    );
-  }, []);
+  // useEffect(() => {
+  //   // console.log(player, banker, tie, playerPair, bankerPair);
+  //   addEventListener("BetCallback", setScore);
+  //   return () => {
+  //     removeEventListener("BetCallback", setScore);
+  //   };
+  // }, [addEventListener, removeEventListener, setScore]);
+
+  // useEffect(() => {
+  //   addEventListener("SetScore", setScore);
+  //   return () => {
+  //     removeEventListener("SetScore", setScore);
+  //   };
+  // }, [addEventListener, removeEventListener, setScore]);
 
   return (
     <div className='experience'>
+      <p>Loading {loadingProgression}... {isLoaded}</p>
       <div className='game-block'>
-        <Unity unityContext={unityContext}
+        <Unity unityProvider={unityProvider}
           style={{
             height: "100%",
             width: '100%',
             borderRadius: '15px',
           }} />
       </div>
+      <button onClick={sendPlayerCard}>send player card</button>
+      <button onClick={init}>init point</button>
+
       {/* <button onClick={sendPlayerCard}>send player card</button>
       <button onClick={sendBankerCard}>send banker card</button>
       <button onClick={sendResult.bind(this, 'Player')}>send result</button> */}
-      {/* <button onClick={betUser}>Bet</button> */}
+      {/* <button onClick={() => sendResult('tie')}>Bet</button> */}
       <p>{betResult.result} {betResult.earn}</p>
     </div>
   );

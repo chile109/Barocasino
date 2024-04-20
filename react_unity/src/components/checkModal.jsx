@@ -78,8 +78,9 @@ function CheckModal(props) {
 
      
 
-      navigate('/game')
+      
     }
+    navigate('/game')
   }
 
   return (
